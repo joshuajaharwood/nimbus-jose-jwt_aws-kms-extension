@@ -16,8 +16,6 @@
 
 package com.nimbusds.jose.aws.kms.crypto.impl;
 
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.EncryptionAlgorithmSpec;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.nimbusds.jose.EncryptionMethod;
@@ -32,6 +30,11 @@ import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
+import software.amazon.awssdk.services.kms.KmsClient;
+import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This class provides cryptography support for Asymmetric and Symmetric encryption/decryption with keys stored in AWS
@@ -43,7 +46,7 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends PublicBaseJWEPr
      */
     @NonNull
     @Getter(AccessLevel.PROTECTED)
-    private final AWSKMS kms;
+    private final KmsClient kms;
 
     /**
      * KMS key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
@@ -54,18 +57,18 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends PublicBaseJWEPr
 
     /**
      * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
-     * Ref: https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext
+     * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
      */
     @Getter(AccessLevel.PROTECTED)
     private Map<String, String> encryptionContext;
 
-    /**
-     * The supported JWE algorithms (alg) by the AWS crypto provider class.
-     * <p>
-     * Note: We accept both the algorithms defined in RFC-7518 and KMS-defined strings.
-     * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC-7518 Section 4.1</a>
-     * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/asymmetric-key-specs.html"> KMS Asymmetric key specs </a>
-     */
+  /**
+   * The supported JWE algorithms (alg) by the AWS crypto provider class.
+   * <p>
+   * Note: We accept both the algorithms defined in RFC-7518 and KMS-defined strings.
+   * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC-7518 Section 4.1</a>
+   * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/asymmetric-key-specs.html"> KMS Asymmetric key specs </a>
+   */
     public static final Set<JWEAlgorithm> SUPPORTED_ALGORITHMS = ImmutableSet.of(
             JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()),
             JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()),
@@ -93,14 +96,14 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends PublicBaseJWEPr
 
     public static final String ENCRYPTION_CONTEXT_HEADER = "ec";
 
-    protected KmsDefaultEncryptionCryptoProvider(@NonNull final AWSKMS kms, @NonNull final String keyId) {
+    protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId) {
         super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
         this.kms = kms;
         this.keyId = keyId;
     }
 
-    protected KmsDefaultEncryptionCryptoProvider(@NonNull final AWSKMS kms, @NonNull final String keyId,
-            @NonNull final Map<String, String> encryptionContext) {
+    protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId,
+                                                 @NonNull final Map<String, String> encryptionContext) {
         this(kms, keyId);
         this.encryptionContext = ImmutableMap.copyOf(encryptionContext);
     }
