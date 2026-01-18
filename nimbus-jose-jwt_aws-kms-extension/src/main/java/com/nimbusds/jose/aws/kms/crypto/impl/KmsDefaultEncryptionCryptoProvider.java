@@ -25,8 +25,6 @@ import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.crypto.impl.PublicBaseJWEProvider;
-import java.util.Map;
-import java.util.Set;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -41,74 +39,60 @@ import java.util.Set;
  * KMS.
  */
 public abstract class KmsDefaultEncryptionCryptoProvider extends PublicBaseJWEProvider {
-    /**
-     * AWS-KMS client.
-     */
-    @NonNull
-    @Getter(AccessLevel.PROTECTED)
-    private final KmsClient kms;
+  /**
+   * AWS-KMS client.
+   */
+  @NonNull
+  @Getter(AccessLevel.PROTECTED)
+  private final KmsClient kms;
 
-    /**
-     * KMS key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
-     */
-    @NonNull
-    @Getter(AccessLevel.PROTECTED)
-    private final String keyId;
+  /**
+   * KMS key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
+   */
+  @NonNull
+  @Getter(AccessLevel.PROTECTED)
+  private final String keyId;
 
-    /**
-     * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
-     * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
-     */
-    @Getter(AccessLevel.PROTECTED)
-    private Map<String, String> encryptionContext;
+  /**
+   * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
+   * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
+   */
+  @Getter(AccessLevel.PROTECTED)
+  private Map<String, String> encryptionContext;
 
   /**
    * The supported JWE algorithms (alg) by the AWS crypto provider class.
    * <p>
    * Note: We accept both the algorithms defined in RFC-7518 and KMS-defined strings.
+   *
    * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC-7518 Section 4.1</a>
    * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/asymmetric-key-specs.html"> KMS Asymmetric key specs </a>
    */
-    public static final Set<JWEAlgorithm> SUPPORTED_ALGORITHMS = ImmutableSet.of(
-            JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()),
-            JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()),
-            JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()),
-            JWEAlgorithm.A256GCMKW,
-            JWEAlgorithm.RSA_OAEP_256,
-            JWEAlgorithm.RSA_OAEP);
+  public static final Set<JWEAlgorithm> SUPPORTED_ALGORITHMS = ImmutableSet.of(JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()), JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()), JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()), JWEAlgorithm.A256GCMKW, JWEAlgorithm.RSA_OAEP_256, JWEAlgorithm.RSA_OAEP);
 
-    public static final Map<JWEAlgorithm, String> JWE_TO_KMS_ALGORITHM_SPEC = ImmutableMap.<JWEAlgorithm, String>builder()
-            .put(JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()), EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name())
-            .put(JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()), EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name())
-            .put(JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()), EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name())
-            .put(JWEAlgorithm.A256GCMKW, EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name())
-            .put(JWEAlgorithm.RSA_OAEP_256, EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name())
-            .put(JWEAlgorithm.RSA_OAEP, EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name())
-            .build();
+  public static final Map<JWEAlgorithm, String> JWE_TO_KMS_ALGORITHM_SPEC = ImmutableMap.<JWEAlgorithm, String>builder().put(JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()), EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()).put(JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()), EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()).put(JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()), EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()).put(JWEAlgorithm.A256GCMKW, EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()).put(JWEAlgorithm.RSA_OAEP_256, EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()).put(JWEAlgorithm.RSA_OAEP, EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()).build();
 
-    /**
-     * The supported JWE encryption methods (enc) by the AWS crypto provider class.
-     * <p>
-     * Note: We are using JWE prescribed encryption method names here.
-     */
-    public static final Set<EncryptionMethod> SUPPORTED_ENCRYPTION_METHODS =
-            ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS;
+  /**
+   * The supported JWE encryption methods (enc) by the AWS crypto provider class.
+   * <p>
+   * Note: We are using JWE prescribed encryption method names here.
+   */
+  public static final Set<EncryptionMethod> SUPPORTED_ENCRYPTION_METHODS = ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS;
 
-    public static final String ENCRYPTION_CONTEXT_HEADER = "ec";
+  public static final String ENCRYPTION_CONTEXT_HEADER = "ec";
 
-    protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId) {
-        super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
-        this.kms = kms;
-        this.keyId = keyId;
-    }
+  protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId) {
+    super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
+    this.kms = kms;
+    this.keyId = keyId;
+  }
 
-    protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId,
-                                                 @NonNull final Map<String, String> encryptionContext) {
-        this(kms, keyId);
-        this.encryptionContext = ImmutableMap.copyOf(encryptionContext);
-    }
+  protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId, @NonNull final Map<String, String> encryptionContext) {
+    this(kms, keyId);
+    this.encryptionContext = ImmutableMap.copyOf(encryptionContext);
+  }
 
-    protected void validateJWEHeader(@NonNull final JWEHeader header) throws JOSEException {
-        JWEHeaderUtil.validateJWEHeaderAlgorithms(header, SUPPORTED_ALGORITHMS, SUPPORTED_ENCRYPTION_METHODS);
-    }
+  protected void validateJWEHeader(@NonNull final JWEHeader header) throws JOSEException {
+    JWEHeaderUtil.validateJWEHeaderAlgorithms(header, SUPPORTED_ALGORITHMS, SUPPORTED_ENCRYPTION_METHODS);
+  }
 }
