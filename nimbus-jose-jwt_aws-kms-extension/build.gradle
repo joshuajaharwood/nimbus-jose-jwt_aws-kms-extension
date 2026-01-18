@@ -2,7 +2,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     id 'jacoco'
-    id "io.freefair.lombok" version "6.1.0"
+    id "io.freefair.lombok" version "8.14"
     id 'maven-publish'
     id 'signing'
 }
@@ -18,7 +18,7 @@ java {
     withSourcesJar()
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
@@ -31,6 +31,8 @@ dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api 'com.nimbusds:nimbus-jose-jwt:[9,9.31]'
 
+    compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
+
     // These dependencies is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.amazonaws:aws-java-sdk-kms:[1.12, 2)'
     implementation 'commons-cli:commons-cli:[1.4, 2)'
@@ -38,6 +40,8 @@ dependencies {
 
     // Use JUnit Jupiter for testing.
     testImplementation 'org.junit.jupiter:junit-jupiter:5.+'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
     testImplementation 'org.assertj:assertj-core:[3,4)'
 
     // Mockito
