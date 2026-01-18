@@ -17,7 +17,7 @@ import java.util.Map;
 import static com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider.JWE_TO_KMS_ALGORITHM_SPEC;
 
 /**
- * Utility class containing JWE decryption related methods.
+ * Utility class containing JWE decryption-related methods.
  */
 @UtilityClass
 public class JWEDecrypterUtil {

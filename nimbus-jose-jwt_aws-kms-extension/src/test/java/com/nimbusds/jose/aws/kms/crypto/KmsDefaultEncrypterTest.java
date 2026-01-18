@@ -235,7 +235,7 @@ class KmsDefaultEncrypterTest {
                     when(mockAwsKms
                             .encrypt(EncryptRequest.builder()
                                     .keyId(testKeyId)
-                                    .encryptionAlgorithm(testJweHeader.getAlgorithm().getName())
+                                    .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                     .plaintext(SdkBytes.fromByteBuffer(ByteBuffer.wrap(cekBytes)))
                                     .build()))
                             .thenReturn(testEncryptedKey);

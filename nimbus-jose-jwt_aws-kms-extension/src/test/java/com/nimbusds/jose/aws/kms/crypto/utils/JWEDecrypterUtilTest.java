@@ -1,18 +1,5 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
-import com.amazonaws.services.kms.AWSKMS;
-import com.amazonaws.services.kms.model.AWSKMSException;
-import com.amazonaws.services.kms.model.DecryptRequest;
-import com.amazonaws.services.kms.model.DecryptResult;
-import com.amazonaws.services.kms.model.DependencyTimeoutException;
-import com.amazonaws.services.kms.model.DisabledException;
-import com.amazonaws.services.kms.model.EncryptionAlgorithmSpec;
-import com.amazonaws.services.kms.model.InvalidGrantTokenException;
-import com.amazonaws.services.kms.model.InvalidKeyUsageException;
-import com.amazonaws.services.kms.model.KeyUnavailableException;
-import com.amazonaws.services.kms.model.KMSInternalException;
-import com.amazonaws.services.kms.model.KMSInvalidStateException;
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
