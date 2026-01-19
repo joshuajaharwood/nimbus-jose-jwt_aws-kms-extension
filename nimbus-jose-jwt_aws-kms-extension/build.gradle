@@ -7,8 +7,8 @@ plugins {
     id 'signing'
 }
 
-group = 'software.amazon.lynx'
-version = '1.4.0'
+group = 'com.joshuaharwood'
+version = '2.0.0-SNAPSHOT'
 
 java {
     toolchain {
@@ -29,13 +29,13 @@ repositories {
 
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
-    api 'com.nimbusds:nimbus-jose-jwt:[9,9.31]'
+    // TODO: 9.32 onwards adds AAD support. Once implemented in our implementations, we can jump to 10.x - JH
+    api 'com.nimbusds:nimbus-jose-jwt:9.31'
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 
     // These dependencies is used internally, and not exposed to consumers on their own compile classpath.
-    implementation 'software.amazon.awssdk:kms:2.30.18'
-    //todo: review these commons deps
+    implementation 'software.amazon.awssdk:kms:2.41.10'
     implementation 'commons-cli:commons-cli:1.9.0'
     implementation 'commons-codec:commons-codec:1.18.0'
 
