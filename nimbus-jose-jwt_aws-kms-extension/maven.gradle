@@ -5,11 +5,11 @@ publishing {
                 from components.java
             }
             pom {
-                name = 'AWS KMS Extension, for Nimbus JOSE JWT'
-                description = 'This library package is an extension of nimbus-jose-jwt library. ' +
+                name = 'AWS KMS Extension Fork, for Nimbus JOSE JWT'
+                description = 'This library package is a fork of an extension of nimbus-jose-jwt library. ' +
                         'It provides JWE based encrypters/decrypters and JWS based signers/verifiers ' +
                         'for doing operations with cryptographic keys stores in AWS KMS.'
-                url = 'https://github.com/amzn/nimbus-jose-jwt_aws-kms-extension'
+                url = 'https://github.com/joshuajaharwood/nimbus-jose-jwt_aws-kms-extension'
                 licenses {
                     license {
                         name = 'The Apache License, Version 2.0'
@@ -17,8 +17,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:ssh://github.com/amzn/nimbus-jose-jwt_aws-kms-extension.git'
-                    url = 'https://github.com/amzn/nimbus-jose-jwt_aws-kms-extension'
+                    connection = 'scm:git:ssh://github.com/joshuajaharwood/nimbus-jose-jwt_aws-kms-extension.git'
+                    url = 'https://github.com/joshuajaharwood/nimbus-jose-jwt_aws-kms-extension'
                     tag = "v$version"
                 }
                 developers {
@@ -26,6 +26,11 @@ publishing {
                         id = 'lynx-tech'
                         name = 'Lync Tech'
                         email = 'lynx-tech@amazon.com'
+                    }
+                    developer {
+                        id = 'joshuajaharwood'
+                        name = 'Joshua J. A. Harwood'
+                        email = 'me@joshuaharwood.com'
                     }
                 }
             }
