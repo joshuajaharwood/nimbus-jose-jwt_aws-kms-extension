@@ -166,7 +166,7 @@ public class KmsDefaultDecrypterTest {
             private final DecryptResponse testDecryptResponse = DecryptResponse.builder().plaintext(SdkBytes.fromString("test", Charset.defaultCharset())).build();
             private final MockedStatic<ContentCryptoProvider> mockContentCryptoProvider =
                     mockStatic(ContentCryptoProvider.class);
-            private byte[] expectedData = new byte[random.nextInt(512)];
+            private final byte[] expectedData = new byte[random.nextInt(512)];
 
             @BeforeEach
             @SneakyThrows
@@ -200,7 +200,7 @@ public class KmsDefaultDecrypterTest {
                 })
                 void shouldThrowException(final Class<Throwable> exceptionClass) {
                     try (MockedStatic<JWEDecrypterUtil> utilMockedStatic = mockStatic(JWEDecrypterUtil.class)) {
-                        utilMockedStatic.when(() -> jweDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
+                        utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
                                         testJweHeader, testEncryptedKey, testIv, testCipherText,
                                         testAuthTag, null, mockJWEJCAContext))
                                 .thenThrow(exceptionClass);
@@ -225,7 +225,7 @@ public class KmsDefaultDecrypterTest {
                                     .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
                                     .build()))
                             .thenReturn(testDecryptResponse);
-                    when(jweDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
+                    when(JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
                             testJweHeader, testEncryptedKey, testIv, testCipherText,
                             testAuthTag, null, mockJWEJCAContext))
                             .thenReturn(expectedData);

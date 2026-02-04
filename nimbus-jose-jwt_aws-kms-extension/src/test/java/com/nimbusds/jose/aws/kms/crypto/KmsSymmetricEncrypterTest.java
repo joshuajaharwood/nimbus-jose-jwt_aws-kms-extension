@@ -21,6 +21,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
+import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
 import lombok.SneakyThrows;
@@ -147,7 +148,7 @@ class KmsSymmetricEncrypterTest {
                     KmsInternalException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
                 final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
-                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null))
+                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(TemporaryJOSEException.class)
                         .hasMessage("A temporary error was thrown from KMS.")
                         .hasCause(invalidKeyException);

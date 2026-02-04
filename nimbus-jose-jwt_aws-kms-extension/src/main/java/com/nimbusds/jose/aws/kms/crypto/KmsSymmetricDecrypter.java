@@ -22,6 +22,7 @@ import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
+import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
 import lombok.NonNull;
@@ -75,6 +76,17 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
     @Override
     public Set<String> getDeferredCriticalHeaderParams() {
         return critPolicy.getDeferredCriticalHeaderParams();
+    }
+
+    @Deprecated
+    public byte[] decrypt(final JWEHeader header,
+                          final Base64URL encryptedKey,
+                          final Base64URL iv,
+                          final Base64URL cipherText,
+                          final Base64URL authTag)
+            throws JOSEException {
+
+        return decrypt(header, encryptedKey, iv, cipherText, authTag, AAD.compute(header));
     }
 
     @Override

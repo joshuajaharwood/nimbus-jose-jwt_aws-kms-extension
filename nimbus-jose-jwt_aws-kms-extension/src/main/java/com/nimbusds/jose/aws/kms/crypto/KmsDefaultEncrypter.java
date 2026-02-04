@@ -20,6 +20,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
+import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
 import lombok.NonNull;
@@ -50,11 +51,16 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
         super(kms, keyId, encryptionContext);
     }
 
+    @Deprecated
+    public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText) throws JOSEException {
+        return encrypt(header, clearText, AAD.compute(header));
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, @NonNull final byte[] clearText, final byte[] aad)
+    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);

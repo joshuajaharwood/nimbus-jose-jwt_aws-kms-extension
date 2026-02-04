@@ -23,8 +23,8 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
+import com.nimbusds.jose.crypto.impl.BaseJWEProvider;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
-import com.nimbusds.jose.crypto.impl.PublicBaseJWEProvider;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
@@ -38,7 +38,7 @@ import java.util.Set;
  * This class provides cryptography support for Asymmetric and Symmetric encryption/decryption with keys stored in AWS
  * KMS.
  */
-public abstract class KmsDefaultEncryptionCryptoProvider extends PublicBaseJWEProvider {
+public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider {
   /**
    * AWS-KMS client.
    */

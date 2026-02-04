@@ -50,7 +50,7 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
     }
 
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, @NonNull final byte[] clearText, final byte[] aad)
+    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);

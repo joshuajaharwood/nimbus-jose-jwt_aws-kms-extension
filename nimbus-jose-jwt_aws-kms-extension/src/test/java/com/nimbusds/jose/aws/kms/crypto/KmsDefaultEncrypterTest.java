@@ -23,6 +23,7 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
+import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
@@ -117,7 +118,7 @@ class KmsDefaultEncrypterTest {
                     KmsInvalidStateException.class, InvalidGrantTokenException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
                 final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
-                assertThatThrownBy(() -> kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, null))
+                assertThatThrownBy(() -> kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(RemoteKeySourceException.class)
                         .hasMessage("An exception was thrown from KMS due to invalid client request.")
                         .hasCause(invalidKeyException);
@@ -148,7 +149,7 @@ class KmsDefaultEncrypterTest {
                     DependencyTimeoutException.class, KeyUnavailableException.class, KmsInternalException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
                 final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
-                assertThatThrownBy(() -> kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, null))
+                assertThatThrownBy(() -> kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(TemporaryJOSEException.class)
                         .hasMessage("A temporary error was thrown from KMS.")
                         .hasCause(invalidKeyException);
@@ -223,7 +224,7 @@ class KmsDefaultEncrypterTest {
                                     () -> ContentCryptoProvider.encrypt(
                                             testJweHeader,
                                             testClearText,
-                                            null,
+                                            AAD.compute(testJweHeader),
                                             mockCek,
                                             Base64URL.encode(testEncryptedKey.ciphertextBlob().asByteArray()),
                                             mockJWEJCAContext))
@@ -247,7 +248,7 @@ class KmsDefaultEncrypterTest {
                 @SneakyThrows
                 void shouldReturnEncryptedJWEToken() {
                     final JWECryptoParts actualJweCryptoParts =
-                            kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, null);
+                            kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader));
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
                 }
             }
@@ -280,10 +281,9 @@ class KmsDefaultEncrypterTest {
                 @SneakyThrows
                 void shouldReturnEncryptedJWEToken() {
                     final JWECryptoParts actualJweCryptoParts =
-                            kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, null);
+                            kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader));
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
                 }
-
             }
         }
 
