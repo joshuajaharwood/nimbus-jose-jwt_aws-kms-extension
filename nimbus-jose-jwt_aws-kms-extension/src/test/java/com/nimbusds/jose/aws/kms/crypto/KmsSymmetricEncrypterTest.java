@@ -114,7 +114,7 @@ class KmsSymmetricEncrypterTest {
                     KeyUnavailableException.class, KmsInvalidStateException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
                 final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
-                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText))
+                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null))
                         .isInstanceOf(RemoteKeySourceException.class)
                         .hasMessage("An exception was thrown from KMS due to invalid key.")
                         .hasCause(invalidKeyException);
@@ -147,7 +147,7 @@ class KmsSymmetricEncrypterTest {
                     KmsInternalException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
                 final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
-                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText))
+                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null))
                         .isInstanceOf(TemporaryJOSEException.class)
                         .hasMessage("A temporary error was thrown from KMS.")
                         .hasCause(invalidKeyException);
@@ -199,6 +199,7 @@ class KmsSymmetricEncrypterTest {
                                     () -> ContentCryptoProvider.encrypt(
                                             testJweHeader,
                                             testClearText,
+                                            null,
                                             new SecretKeySpec(testGenerateDataKeyResponse.plaintext().asByteArray(),
                                                     testJweHeader.getAlgorithm().toString()),
                                             Base64URL.encode(testGenerateDataKeyResponse.ciphertextBlob().asByteArray()),
@@ -221,7 +222,7 @@ class KmsSymmetricEncrypterTest {
                 @SneakyThrows
                 void shouldReturnEncryptedJWEToken() {
                     final JWECryptoParts actualJweCryptoParts =
-                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText);
+                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null);
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
                 }
 
@@ -243,6 +244,7 @@ class KmsSymmetricEncrypterTest {
                                                             testEncryptionContext))
                                                     .build()),
                                             eq(testClearText),
+                                            isNull(),
                                             eq(new SecretKeySpec(
                                                     testGenerateDataKeyResponse.plaintext().asByteArray(),
                                                     testJweHeader.getAlgorithm().toString())),
@@ -257,7 +259,7 @@ class KmsSymmetricEncrypterTest {
                 @SneakyThrows
                 void shouldReturnEncryptedJWEToken() {
                     final JWECryptoParts actualJweCryptoParts =
-                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText);
+                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null);
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
                 }
 

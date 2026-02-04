@@ -48,7 +48,7 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
     }
 
     @Override
-    public Base64URL sign(@NonNull final JWSHeader header, @NonNull final byte[] signingInput) throws JOSEException {
+    public Base64URL sign(@NonNull final JWSHeader header, final byte @NonNull [] signingInput) throws JOSEException {
 
         final var message = getMessage(header, signingInput);
         SignResponse signResponse;

@@ -54,7 +54,7 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
      * {@inheritDoc}
      */
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, @NonNull final byte[] clearText)
+    public JWECryptoParts encrypt(@NonNull final JWEHeader header, @NonNull final byte[] clearText, final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);
@@ -67,7 +67,7 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
         final EncryptResponse encryptedKey = encryptCEK(getKeyId(), updatedHeader.getAlgorithm(), getEncryptionContext(), cek);
         final Base64URL encodedEncryptedKey = Base64URL.encode(encryptedKey.ciphertextBlob().asByteArray());
 
-        return ContentCryptoProvider.encrypt(updatedHeader, clearText, cek, encodedEncryptedKey, getJCAContext());
+        return ContentCryptoProvider.encrypt(updatedHeader, clearText, aad, cek, encodedEncryptedKey, getJCAContext());
     }
 
     private EncryptResponse encryptCEK(String keyId, JWEAlgorithm alg, Map<String, String> encryptionContext, SecretKey cek)

@@ -30,7 +30,7 @@ repositories {
 dependencies {
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     // TODO: 9.32 onwards adds AAD support. Once implemented in our implementations, we can jump to 10.x - JH
-    api 'com.nimbusds:nimbus-jose-jwt:9.31'
+    api 'com.nimbusds:nimbus-jose-jwt:10.7'
 
     compileOnly 'com.google.code.findbugs:jsr305:3.0.2'
 

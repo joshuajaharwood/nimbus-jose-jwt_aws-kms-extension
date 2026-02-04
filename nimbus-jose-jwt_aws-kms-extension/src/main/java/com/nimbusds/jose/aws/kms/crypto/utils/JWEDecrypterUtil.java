@@ -8,7 +8,16 @@ import com.nimbusds.jose.util.Base64URL;
 import lombok.experimental.UtilityClass;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
-import software.amazon.awssdk.services.kms.model.*;
+import software.amazon.awssdk.services.kms.model.DecryptRequest;
+import software.amazon.awssdk.services.kms.model.DecryptResponse;
+import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
+import software.amazon.awssdk.services.kms.model.DisabledException;
+import software.amazon.awssdk.services.kms.model.InvalidGrantTokenException;
+import software.amazon.awssdk.services.kms.model.InvalidKeyUsageException;
+import software.amazon.awssdk.services.kms.model.KeyUnavailableException;
+import software.amazon.awssdk.services.kms.model.KmsInternalException;
+import software.amazon.awssdk.services.kms.model.KmsInvalidStateException;
+import software.amazon.awssdk.services.kms.model.NotFoundException;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -37,6 +46,7 @@ public class JWEDecrypterUtil {
             Base64URL iv,
             Base64URL cipherText,
             Base64URL authTag,
+            byte[] aad,
             JWEJCAContext jcaContext)
             throws JOSEException {
 
@@ -44,7 +54,7 @@ public class JWEDecrypterUtil {
                 decryptCek(kms, keyId, encryptionContext, header.getAlgorithm(), encryptedKey);
         final SecretKey cek =
                 new SecretKeySpec(cekDecryptResult.plaintext().asByteArray(), header.getAlgorithm().toString());
-        return ContentCryptoProvider.decrypt(header, encryptedKey, iv, cipherText, authTag, cek, jcaContext);
+        return ContentCryptoProvider.decrypt(header, aad, encryptedKey, iv, cipherText, authTag, cek, jcaContext);
     }
 
     private DecryptResponse decryptCek(

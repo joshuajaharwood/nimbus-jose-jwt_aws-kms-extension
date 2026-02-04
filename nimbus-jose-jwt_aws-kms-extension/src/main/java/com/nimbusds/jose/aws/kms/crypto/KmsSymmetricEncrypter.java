@@ -50,7 +50,7 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
     }
 
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, @NonNull final byte[] clearText)
+    public JWECryptoParts encrypt(@NonNull final JWEHeader header, @NonNull final byte[] clearText, final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);
@@ -67,7 +67,7 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
         updatedHeader = JWEHeaderUtil.getJWEHeaderWithEncryptionContext(
                 header, ENCRYPTION_CONTEXT_HEADER, getEncryptionContext());
 
-        return ContentCryptoProvider.encrypt(updatedHeader, clearText, cek, encryptedKey, getJCAContext());
+        return ContentCryptoProvider.encrypt(updatedHeader, clearText, aad, cek, encryptedKey, getJCAContext());
     }
 
     private GenerateDataKeyResponse generateDataKey(String keyId, EncryptionMethod encryptionMethod)

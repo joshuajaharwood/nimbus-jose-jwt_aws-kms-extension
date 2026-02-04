@@ -89,13 +89,14 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
             @NonNull final Base64URL encryptedKey,
             @NonNull final Base64URL iv,
             @NonNull final Base64URL cipherText,
-            @NonNull final Base64URL authTag)
+            @NonNull final Base64URL authTag,
+            final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);
         critPolicy.ensureHeaderPasses(header);
 
         return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), getEncryptionContext(), header, encryptedKey, iv,
-                cipherText, authTag, getJCAContext());
+                cipherText, authTag, aad, getJCAContext());
     }
 }

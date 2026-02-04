@@ -148,7 +148,7 @@ class KmsSymmetricDecrypterTest {
             void shouldThrowJOSEException() {
                 assertThatThrownBy(
                         () -> kmsSymmetricDecrypter.decrypt(testJweHeader, testEncryptedKey, testIv, testCipherText,
-                                testAuthTag))
+                                testAuthTag, null))
                         .isInstanceOf(JOSEException.class)
                         .hasNoCause();
             }
@@ -177,7 +177,7 @@ class KmsSymmetricDecrypterTest {
                 random.nextBytes(expectedData);
                 mockContentCryptoProvider.when(
                                 () -> ContentCryptoProvider.decrypt(
-                                        testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag,
+                                        testJweHeader, null, testEncryptedKey, testIv, testCipherText, testAuthTag,
                                         new SecretKeySpec(
                                                 testDecryptResponse.plaintext().asByteArray(),
                                                 testJweHeader.getAlgorithm().toString()),
@@ -200,10 +200,10 @@ class KmsSymmetricDecrypterTest {
                     try (MockedStatic<JWEDecrypterUtil> utilMockedStatic = mockStatic(JWEDecrypterUtil.class)) {
                         utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
                                         testJweHeader, testEncryptedKey, testIv, testCipherText,
-                                        testAuthTag, mockJWEJCAContext))
+                                        testAuthTag, null, mockJWEJCAContext))
                                 .thenThrow(exceptionClass);
                         assertThrows(exceptionClass, () -> kmsSymmetricDecrypter.decrypt(
-                                testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag));
+                                testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null));
                     }
                 }
             }
@@ -225,7 +225,7 @@ class KmsSymmetricDecrypterTest {
                             .thenReturn(testDecryptResponse);
                     when(JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
                             testJweHeader, testEncryptedKey, testIv, testCipherText,
-                            testAuthTag, mockJWEJCAContext))
+                            testAuthTag, null, mockJWEJCAContext))
                             .thenReturn(expectedData);
                 }
 
@@ -234,7 +234,7 @@ class KmsSymmetricDecrypterTest {
                 @SneakyThrows
                 void shouldReturnDecryptedData() {
                     final byte[] actualData = kmsSymmetricDecrypter.decrypt(
-                            testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag);
+                            testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null);
                     assertThat(actualData).isEqualTo(expectedData);
                 }
             }
