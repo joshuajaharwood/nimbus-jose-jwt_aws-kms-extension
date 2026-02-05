@@ -24,13 +24,13 @@ import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsAsymmetricSigningCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.NonNull;
-import lombok.var;
+import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
 
 import javax.annotation.concurrent.ThreadSafe;
+import java.nio.ByteBuffer;
 
 
 /**
@@ -50,7 +50,7 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
     @Override
     public Base64URL sign(@NonNull final JWSHeader header, final byte @NonNull [] signingInput) throws JOSEException {
 
-        final var message = getMessage(header, signingInput);
+        final ByteBuffer message = getMessage(header, signingInput);
         SignResponse signResponse;
         try {
             signResponse = getKms().sign(SignRequest.builder()

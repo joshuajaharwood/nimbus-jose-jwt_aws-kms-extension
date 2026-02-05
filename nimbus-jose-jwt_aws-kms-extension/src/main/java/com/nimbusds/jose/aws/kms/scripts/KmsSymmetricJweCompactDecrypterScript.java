@@ -16,13 +16,10 @@
 
 package com.nimbusds.jose.aws.kms.scripts;
 
+import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.aws.kms.crypto.KmsSymmetricDecrypter;
-import lombok.var;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import static com.nimbusds.jose.aws.kms.scripts.ScriptConstants.LINE_SEPARATOR;
@@ -43,8 +40,8 @@ public class KmsSymmetricJweCompactDecrypterScript {
     }
 
     private void execute(String[] args) throws Exception {
-        var options = buildOptions();
-        var cmd = new DefaultParser().parse(options, args);
+        Options options = buildOptions();
+        CommandLine cmd = new DefaultParser().parse(options, args);
         if (cmd.hasOption(KmsSymmetricJweCompactDecrypterScriptOptionNames.HELP)) {
             out.println(LINE_SEPARATOR);
             new HelpFormatter().printHelp(COMMAND, options);
@@ -55,14 +52,14 @@ public class KmsSymmetricJweCompactDecrypterScript {
                     LINE_SEPARATOR, KmsSymmetricJweCompactDecrypterScriptOptionNames.JWE_TOKEN,
                     KmsSymmetricJweCompactDecrypterScriptOptionNames.HELP);
         } else {
-            var jweObject = decrypt(cmd.getOptionValue(KmsSymmetricJweCompactDecrypterScriptOptionNames.JWE_TOKEN));
+            JWEObject jweObject = decrypt(cmd.getOptionValue(KmsSymmetricJweCompactDecrypterScriptOptionNames.JWE_TOKEN));
 
             out.printf("%1$sDECRYPTED TEXT :%1$s%2$s%1$s", LINE_SEPARATOR, jweObject.getPayload());
         }
     }
 
     private Options buildOptions() {
-        var options = new Options();
+        Options options = new Options();
 
         options.addOption(Option.builder()
                 .longOpt(KmsSymmetricJweCompactDecrypterScriptOptionNames.HELP)
@@ -87,8 +84,8 @@ public class KmsSymmetricJweCompactDecrypterScript {
     private JWEObject decrypt(String serializedJwe)
             throws Exception {
 
-        var jweObject = JWEObject.parse(serializedJwe);
-        var jweHeader = jweObject.getHeader();
+        JWEObject jweObject = JWEObject.parse(serializedJwe);
+        JWEHeader jweHeader = jweObject.getHeader();
         jweObject.decrypt(new KmsSymmetricDecrypter(
                 KmsClient.create(),
                 jweHeader.getKeyID()));

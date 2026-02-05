@@ -25,7 +25,7 @@ import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import java.util.Map;

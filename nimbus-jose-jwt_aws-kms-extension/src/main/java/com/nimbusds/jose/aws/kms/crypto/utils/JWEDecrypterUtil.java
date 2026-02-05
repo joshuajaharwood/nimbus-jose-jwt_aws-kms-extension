@@ -5,7 +5,6 @@ import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.experimental.UtilityClass;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DecryptRequest;
@@ -28,8 +27,9 @@ import static com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoPr
 /**
  * Utility class containing JWE decryption-related methods.
  */
-@UtilityClass
-public class JWEDecrypterUtil {
+public final class JWEDecrypterUtil {
+    private JWEDecrypterUtil() {
+    }
 
     /**
      * Decrypts the specified cipher text of a {@link JWEObject JWE Object}.
@@ -37,7 +37,7 @@ public class JWEDecrypterUtil {
      * @throws RemoteKeySourceException in case exception is thrown from KMS due to invalid key
      * @throws TemporaryJOSEException   in case temporary error is thrown from KMS
      */
-    public byte[] decrypt(
+    public static byte[] decrypt(
             KmsClient kms,
             String keyId,
             Map<String, String> encryptionContext,
@@ -57,7 +57,7 @@ public class JWEDecrypterUtil {
         return ContentCryptoProvider.decrypt(header, aad, encryptedKey, iv, cipherText, authTag, cek, jcaContext);
     }
 
-    private DecryptResponse decryptCek(
+    private static DecryptResponse decryptCek(
             KmsClient kms,
             String keyId,
             Map<String, String> encryptionContext,

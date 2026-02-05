@@ -22,8 +22,7 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsAsymmetricSigningCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.NonNull;
-import lombok.var;
+import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
@@ -77,14 +76,14 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
 
     @Override
     public boolean verify(
-            @NonNull final JWSHeader header, @NonNull final byte[] signedContent, @NonNull final Base64URL signature)
+            @NonNull final JWSHeader header, final byte @NonNull [] signedContent, @NonNull final Base64URL signature)
             throws JOSEException {
 
         if (!critPolicy.headerPasses(header)) {
             return false;
         }
 
-        var message = getMessage(header, signedContent);
+        ByteBuffer message = getMessage(header, signedContent);
 
         VerifyResponse verifyResponse;
         try {

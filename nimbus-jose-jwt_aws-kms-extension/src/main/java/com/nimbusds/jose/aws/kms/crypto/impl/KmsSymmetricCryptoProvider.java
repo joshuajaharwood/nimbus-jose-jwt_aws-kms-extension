@@ -25,9 +25,7 @@ import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.crypto.impl.BaseJWEProvider;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DataKeySpec;
 import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
@@ -46,21 +44,18 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
      * AWS-KMS client.
      */
     @NonNull
-    @Getter(AccessLevel.PROTECTED)
     private final KmsClient kms;
 
     /**
      * KMS key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
      */
     @NonNull
-    @Getter(AccessLevel.PROTECTED)
     private final String keyId;
 
     /**
      * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
      * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
      */
-    @Getter(AccessLevel.PROTECTED)
     private Map<String, String> encryptionContext;
 
     /**
@@ -85,11 +80,11 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
 
     public static final Map<EncryptionMethod, DataKeySpec> ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP =
             ImmutableMap.<EncryptionMethod, DataKeySpec>builder()
-                    .put(EncryptionMethod.A256GCM, DataKeySpec.AES_256)
-                    .put(EncryptionMethod.A256CBC_HS512, DataKeySpec.AES_256)
-                    .put(EncryptionMethod.A128GCM, DataKeySpec.AES_128)
-                    .put(EncryptionMethod.A128CBC_HS256, DataKeySpec.AES_128)
-                    .build();
+                        .put(EncryptionMethod.A256GCM, DataKeySpec.AES_256)
+                        .put(EncryptionMethod.A256CBC_HS512, DataKeySpec.AES_256)
+                        .put(EncryptionMethod.A128GCM, DataKeySpec.AES_128)
+                        .put(EncryptionMethod.A128CBC_HS256, DataKeySpec.AES_128)
+                        .build();
 
     public static final String ENCRYPTION_CONTEXT_HEADER = "ec";
 
@@ -107,5 +102,19 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
 
     protected void validateJWEHeader(@NonNull final JWEHeader header) throws JOSEException {
         JWEHeaderUtil.validateJWEHeaderAlgorithms(header, SUPPORTED_ALGORITHMS, SUPPORTED_ENCRYPTION_METHODS);
+    }
+
+    @NonNull
+    protected KmsClient getKms() {
+        return this.kms;
+    }
+
+    @NonNull
+    protected String getKeyId() {
+        return this.keyId;
+    }
+
+    protected Map<String, String> getEncryptionContext() {
+        return this.encryptionContext;
     }
 }

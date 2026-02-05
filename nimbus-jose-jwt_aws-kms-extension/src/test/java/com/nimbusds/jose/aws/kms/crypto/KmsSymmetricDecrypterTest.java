@@ -25,7 +25,6 @@ import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -118,7 +117,6 @@ class KmsSymmetricDecrypterTest {
         private final Base64URL testAuthTag = random.nextObject(Base64URL.class);
 
         @BeforeEach
-        @SneakyThrows
         void beforeEach() {
             kmsSymmetricDecrypter = spy(new KmsSymmetricDecrypter(mockAwsKms, testKeyId, testEncryptionContext,
                     testDeferredCriticalHeaders));
@@ -129,8 +127,7 @@ class KmsSymmetricDecrypterTest {
         class WithMissingCriticalHeader {
 
             @BeforeEach
-            @SneakyThrows
-            void beforeEach() {
+            void beforeEach() throws NoSuchMethodException {
                 testJweHeader = new JWEHeader.Builder(
                         JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.toString()),
                         EncryptionMethod.A256GCM)
@@ -191,7 +188,6 @@ class KmsSymmetricDecrypterTest {
             class WithExceptionThrownFromJWEDecrypterUtil {
 
                 @ParameterizedTest
-                @SneakyThrows
                 @DisplayName("should throw exception,")
                 @ValueSource(classes = {
                         JOSEException.class, RemoteKeySourceException.class, TemporaryJOSEException.class
@@ -213,8 +209,7 @@ class KmsSymmetricDecrypterTest {
             class WithDecryptionResultFromJWEDecrypterUtil {
 
                 @BeforeEach
-                @SneakyThrows
-                void beforeEach() {
+                void beforeEach() throws JOSEException {
                     when(mockAwsKms
                             .decrypt(DecryptRequest.builder()
                                     .encryptionContext(testEncryptionContext)
@@ -231,8 +226,7 @@ class KmsSymmetricDecrypterTest {
 
                 @Test
                 @DisplayName("should return decrypted data.")
-                @SneakyThrows
-                void shouldReturnDecryptedData() {
+                void shouldReturnDecryptedData() throws JOSEException {
                     final byte[] actualData = kmsSymmetricDecrypter.decrypt(
                             testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null);
                     assertThat(actualData).isEqualTo(expectedData);
@@ -240,15 +234,13 @@ class KmsSymmetricDecrypterTest {
             }
 
             @AfterEach
-            @SneakyThrows
             void afterEach() {
                 mockContentCryptoProvider.close();
             }
         }
 
         @AfterEach
-        @SneakyThrows
-        void afterEach() {
+        void afterEach() throws NoSuchMethodException {
             ReflectionSupport.invokeMethod(
                     kmsSymmetricDecrypter.getClass().getSuperclass()
                             .getDeclaredMethod("validateJWEHeader", JWEHeader.class),

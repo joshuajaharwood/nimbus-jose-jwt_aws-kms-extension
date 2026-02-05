@@ -21,11 +21,8 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.impl.BaseJWSProvider;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.var;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
+import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
@@ -47,14 +44,12 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
      * AWS-KMS client.
      */
     @NonNull
-    @Getter(AccessLevel.PROTECTED)
     private final KmsClient kms;
 
     /**
      * KMS private-key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
      */
     @NonNull
-    @Getter(AccessLevel.PROTECTED)
     private final String privateKeyId;
 
     /**
@@ -62,72 +57,71 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
      * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Sign.html#KMS-Sign-request-MessageType">...</a>
      */
     @NonNull
-    @Getter(AccessLevel.PROTECTED)
     private final MessageType messageType;
 
     public static final Map<JWSAlgorithm, String> JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM =
             ImmutableMap.<JWSAlgorithm, String>builder()
-                    .put(JWSAlgorithm.RS256, MessageDigestAlgorithms.SHA_256)
-                    .put(JWSAlgorithm.RS384, MessageDigestAlgorithms.SHA_384)
-                    .put(JWSAlgorithm.RS512, MessageDigestAlgorithms.SHA_512)
-                    .put(JWSAlgorithm.PS256, MessageDigestAlgorithms.SHA_256)
-                    .put(JWSAlgorithm.PS384, MessageDigestAlgorithms.SHA_384)
-                    .put(JWSAlgorithm.PS512, MessageDigestAlgorithms.SHA_512)
-                    .put(JWSAlgorithm.ES256, MessageDigestAlgorithms.SHA_256)
-                    .put(JWSAlgorithm.ES384, MessageDigestAlgorithms.SHA_384)
-                    .put(JWSAlgorithm.ES512, MessageDigestAlgorithms.SHA_512)
-                    // backwards compatibility for KMS-defined algorithm strings
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256.toString()),
-                            MessageDigestAlgorithms.SHA_256)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384.toString()),
-                            MessageDigestAlgorithms.SHA_384)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512.toString()),
-                            MessageDigestAlgorithms.SHA_512)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_256.toString()),
-                            MessageDigestAlgorithms.SHA_256)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_384.toString()),
-                            MessageDigestAlgorithms.SHA_384)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_512.toString()),
-                            MessageDigestAlgorithms.SHA_512)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_256.toString()),
-                            MessageDigestAlgorithms.SHA_256)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_384.toString()),
-                            MessageDigestAlgorithms.SHA_384)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_512.toString()),
-                            MessageDigestAlgorithms.SHA_512)
-                    .build();
+                        .put(JWSAlgorithm.RS256, MessageDigestAlgorithms.SHA_256)
+                        .put(JWSAlgorithm.RS384, MessageDigestAlgorithms.SHA_384)
+                        .put(JWSAlgorithm.RS512, MessageDigestAlgorithms.SHA_512)
+                        .put(JWSAlgorithm.PS256, MessageDigestAlgorithms.SHA_256)
+                        .put(JWSAlgorithm.PS384, MessageDigestAlgorithms.SHA_384)
+                        .put(JWSAlgorithm.PS512, MessageDigestAlgorithms.SHA_512)
+                        .put(JWSAlgorithm.ES256, MessageDigestAlgorithms.SHA_256)
+                        .put(JWSAlgorithm.ES384, MessageDigestAlgorithms.SHA_384)
+                        .put(JWSAlgorithm.ES512, MessageDigestAlgorithms.SHA_512)
+                        // backwards compatibility for KMS-defined algorithm strings
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256.toString()),
+                                MessageDigestAlgorithms.SHA_256)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384.toString()),
+                                MessageDigestAlgorithms.SHA_384)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512.toString()),
+                                MessageDigestAlgorithms.SHA_512)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_256.toString()),
+                                MessageDigestAlgorithms.SHA_256)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_384.toString()),
+                                MessageDigestAlgorithms.SHA_384)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_512.toString()),
+                                MessageDigestAlgorithms.SHA_512)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_256.toString()),
+                                MessageDigestAlgorithms.SHA_256)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_384.toString()),
+                                MessageDigestAlgorithms.SHA_384)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_512.toString()),
+                                MessageDigestAlgorithms.SHA_512)
+                        .build();
 
-    public static final Map<JWSAlgorithm, SigningAlgorithmSpec> JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC =
+    public static final ImmutableMap<JWSAlgorithm, SigningAlgorithmSpec> JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC =
             ImmutableMap.<JWSAlgorithm, SigningAlgorithmSpec>builder()
-                    .put(JWSAlgorithm.RS256, SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256)
-                    .put(JWSAlgorithm.RS384, SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384)
-                    .put(JWSAlgorithm.RS512, SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512)
-                    .put(JWSAlgorithm.PS256, SigningAlgorithmSpec.RSASSA_PSS_SHA_256)
-                    .put(JWSAlgorithm.PS384, SigningAlgorithmSpec.RSASSA_PSS_SHA_384)
-                    .put(JWSAlgorithm.PS512, SigningAlgorithmSpec.RSASSA_PSS_SHA_512)
-                    .put(JWSAlgorithm.ES256, SigningAlgorithmSpec.ECDSA_SHA_256)
-                    .put(JWSAlgorithm.ES384, SigningAlgorithmSpec.ECDSA_SHA_384)
-                    .put(JWSAlgorithm.ES512, SigningAlgorithmSpec.ECDSA_SHA_512)
-                    // Compatibility for KMS-defined algorithm strings
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256.toString()),
-                            SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384.toString()),
-                            SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512.toString()),
-                            SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_256.toString()),
-                            SigningAlgorithmSpec.RSASSA_PSS_SHA_256)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_384.toString()),
-                            SigningAlgorithmSpec.RSASSA_PSS_SHA_384)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_512.toString()),
-                            SigningAlgorithmSpec.RSASSA_PSS_SHA_512)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_256.toString()),
-                            SigningAlgorithmSpec.ECDSA_SHA_256)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_384.toString()),
-                            SigningAlgorithmSpec.ECDSA_SHA_384)
-                    .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_512.toString()),
-                            SigningAlgorithmSpec.ECDSA_SHA_512)
-                    .build();
+                        .put(JWSAlgorithm.RS256, SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256)
+                        .put(JWSAlgorithm.RS384, SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384)
+                        .put(JWSAlgorithm.RS512, SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512)
+                        .put(JWSAlgorithm.PS256, SigningAlgorithmSpec.RSASSA_PSS_SHA_256)
+                        .put(JWSAlgorithm.PS384, SigningAlgorithmSpec.RSASSA_PSS_SHA_384)
+                        .put(JWSAlgorithm.PS512, SigningAlgorithmSpec.RSASSA_PSS_SHA_512)
+                        .put(JWSAlgorithm.ES256, SigningAlgorithmSpec.ECDSA_SHA_256)
+                        .put(JWSAlgorithm.ES384, SigningAlgorithmSpec.ECDSA_SHA_384)
+                        .put(JWSAlgorithm.ES512, SigningAlgorithmSpec.ECDSA_SHA_512)
+                        // Compatibility for KMS-defined algorithm strings
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256.toString()),
+                                SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_256)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384.toString()),
+                                SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_384)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512.toString()),
+                                SigningAlgorithmSpec.RSASSA_PKCS1_V1_5_SHA_512)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_256.toString()),
+                                SigningAlgorithmSpec.RSASSA_PSS_SHA_256)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_384.toString()),
+                                SigningAlgorithmSpec.RSASSA_PSS_SHA_384)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.RSASSA_PSS_SHA_512.toString()),
+                                SigningAlgorithmSpec.RSASSA_PSS_SHA_512)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_256.toString()),
+                                SigningAlgorithmSpec.ECDSA_SHA_256)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_384.toString()),
+                                SigningAlgorithmSpec.ECDSA_SHA_384)
+                        .put(JWSAlgorithm.parse(SigningAlgorithmSpec.ECDSA_SHA_512.toString()),
+                                SigningAlgorithmSpec.ECDSA_SHA_512)
+                        .build();
     /**
      * The supported JWS algorithms (alg).
      * <p>
@@ -149,13 +143,13 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
     }
 
     protected ByteBuffer getMessage(final JWSHeader header, final byte[] signingInput) throws JOSEException {
-        final var alg = header.getAlgorithm();
-        var message = signingInput;
+        final JWSAlgorithm alg = header.getAlgorithm();
+        byte[] message = signingInput;
 
         String messageDigestAlgorithm = Optional.ofNullable(JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM.get(alg))
-                .orElseThrow(() -> new JOSEException(
-                        String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
-                                alg, JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM)));
+                                                .orElseThrow(() -> new JOSEException(
+                                                        String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
+                                                                alg, JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM)));
 
         if (messageType == MessageType.DIGEST) {
             MessageDigest messageDigestProvider;
@@ -168,5 +162,20 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
         }
 
         return ByteBuffer.wrap(message);
+    }
+
+    @NonNull
+    protected KmsClient getKms() {
+        return this.kms;
+    }
+
+    @NonNull
+    protected String getPrivateKeyId() {
+        return this.privateKeyId;
+    }
+
+    @NonNull
+    protected MessageType getMessageType() {
+        return this.messageType;
     }
 }

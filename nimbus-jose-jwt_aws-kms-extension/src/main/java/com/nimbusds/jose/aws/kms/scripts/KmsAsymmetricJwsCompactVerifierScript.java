@@ -18,14 +18,9 @@ package com.nimbusds.jose.aws.kms.scripts;
 
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.aws.kms.crypto.KmsAsymmetricVerifier;
-import lombok.var;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.MessageType;
-
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -51,8 +46,8 @@ public class KmsAsymmetricJwsCompactVerifierScript {
     }
 
     private void execute(String[] args) throws Exception {
-        var options = buildOptions();
-        var cmd = new DefaultParser().parse(options, args);
+        Options options = buildOptions();
+        CommandLine cmd = new DefaultParser().parse(options, args);
         if (cmd.hasOption(KmsAsymmetricJwsCompactVerifierScriptOptionNames.HELP)) {
             out.println(LINE_SEPARATOR);
             new HelpFormatter().printHelp(COMMAND, options);
@@ -63,7 +58,7 @@ public class KmsAsymmetricJwsCompactVerifierScript {
                     LINE_SEPARATOR, KmsAsymmetricJwsCompactVerifierScriptOptionNames.JWS_TOKEN,
                     KmsAsymmetricJwsCompactVerifierScriptOptionNames.HELP);
         } else {
-            var verificationResult = verify(
+            boolean verificationResult = verify(
                     cmd.getOptionValue(KmsAsymmetricJwsCompactVerifierScriptOptionNames.JWS_TOKEN),
                     cmd.getOptionValue(KmsAsymmetricJwsCompactVerifierScriptOptionNames.MESSAGE_TYPE),
                     cmd.getOptionValue(KmsAsymmetricJwsCompactVerifierScriptOptionNames.DEFERRED_CRITICAL_HEADERS));
@@ -74,7 +69,7 @@ public class KmsAsymmetricJwsCompactVerifierScript {
     }
 
     private Options buildOptions() {
-        var options = new Options();
+        Options options = new Options();
 
         options.addOption(Option.builder()
                 .longOpt(KmsAsymmetricJwsCompactVerifierScriptOptionNames.HELP)
@@ -104,9 +99,9 @@ public class KmsAsymmetricJwsCompactVerifierScript {
                            final String defCritHeadersString)
             throws Exception {
 
-        var jwsObject = JWSObject.parse(serializedJws);
+        JWSObject jwsObject = JWSObject.parse(serializedJws);
 
-        final var messageType = MessageType.fromValue(
+        final MessageType messageType = MessageType.fromValue(
                 Objects.nonNull(messageTypeString) ?
                         messageTypeString : jwsObject.getHeader().getCustomParam(MESSAGE_TYPE).toString());
 

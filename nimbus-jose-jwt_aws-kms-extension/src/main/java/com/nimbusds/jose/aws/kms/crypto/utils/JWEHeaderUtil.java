@@ -6,8 +6,7 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.crypto.impl.AlgorithmSupportMessage;
-import lombok.NonNull;
-import lombok.experimental.UtilityClass;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -16,13 +15,14 @@ import java.util.Set;
 /**
  * Utility class containing JWE header related methods.
  */
-@UtilityClass
-public class JWEHeaderUtil {
+public final class JWEHeaderUtil {
+    private JWEHeaderUtil() {
+    }
 
     /**
      * Method to validation the algorithm and encryption-method of the passed JWE header.
      */
-    public void validateJWEHeaderAlgorithms(
+    public static void validateJWEHeaderAlgorithms(
             @NonNull final JWEHeader header,
             @NonNull Set<JWEAlgorithm> supportedAlgorithms,
             @NonNull Set<EncryptionMethod> supportedEncryptionMethods) throws JOSEException {
@@ -45,7 +45,7 @@ public class JWEHeaderUtil {
      * <p>
      * This method doesn't mutate the passed {@link JWEHeader} object. It rather returns a new {@link JWEHeader} object.
      */
-    public JWEHeader getJWEHeaderWithEncryptionContext(
+    public static JWEHeader getJWEHeaderWithEncryptionContext(
             @NonNull final JWEHeader header,
             @NonNull String encryptionContextHeaderName,
             Map<String, String> encryptionContext) {

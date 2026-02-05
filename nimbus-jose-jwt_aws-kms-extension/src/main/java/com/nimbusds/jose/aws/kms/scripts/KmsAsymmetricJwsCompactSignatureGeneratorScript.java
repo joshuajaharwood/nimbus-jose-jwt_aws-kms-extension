@@ -21,11 +21,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.aws.kms.crypto.KmsAsymmetricSigner;
-import lombok.var;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
+import org.apache.commons.cli.*;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.MessageType;
 
@@ -48,8 +44,8 @@ public class KmsAsymmetricJwsCompactSignatureGeneratorScript {
     }
 
     private void execute(String[] args) throws Exception {
-        var options = buildOptions();
-        var cmd = new DefaultParser().parse(options, args);
+        Options options = buildOptions();
+        CommandLine cmd = new DefaultParser().parse(options, args);
 
         if (cmd.hasOption(KmsAsymmetricJwsCompactSignatureGeneratorScriptOptionNames.HELP)) {
             out.println(LINE_SEPARATOR);
@@ -67,7 +63,7 @@ public class KmsAsymmetricJwsCompactSignatureGeneratorScript {
                     KmsAsymmetricJwsCompactSignatureGeneratorScriptOptionNames.MESSAGE_TYPE,
                     KmsAsymmetricJwsCompactSignatureGeneratorScriptOptionNames.HELP);
         } else {
-            var jwsObject = sign(
+            JWSObject jwsObject = sign(
                     JWSAlgorithm
                             .parse(cmd.getOptionValue(KmsAsymmetricJwsCompactSignatureGeneratorScriptOptionNames.ALG)),
                     cmd.getOptionValue(KmsAsymmetricJwsCompactSignatureGeneratorScriptOptionNames.KID),
@@ -79,7 +75,7 @@ public class KmsAsymmetricJwsCompactSignatureGeneratorScript {
     }
 
     private Options buildOptions() {
-        var options = new Options();
+        Options options = new Options();
 
         options.addOption(Option.builder()
                 .longOpt(KmsAsymmetricJwsCompactSignatureGeneratorScriptOptionNames.HELP)
@@ -118,15 +114,15 @@ public class KmsAsymmetricJwsCompactSignatureGeneratorScript {
 
     private JWSObject sign(final JWSAlgorithm alg, final String kid, final String payload, final String messageType)
             throws Exception {
-        final var jwsSigner = new KmsAsymmetricSigner(
+        final KmsAsymmetricSigner jwsSigner = new KmsAsymmetricSigner(
                 KmsClient.create(),
                 kid,
                 MessageType.fromValue(messageType));
-        final var jwsHeader = new JWSHeader.Builder(alg)
+        final JWSHeader jwsHeader = new JWSHeader.Builder(alg)
                 .keyID(kid)
                 .customParam(MESSAGE_TYPE, messageType)
                 .build();
-        final var jwsObject = new JWSObject(jwsHeader, new Payload(payload));
+        final JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(payload));
         jwsObject.sign(jwsSigner);
         return jwsObject;
     }

@@ -18,11 +18,8 @@ package com.nimbusds.jose.aws.kms.scripts;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.KmsSymmetricEncrypter;
-import lombok.var;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.*;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import static com.nimbusds.jose.aws.kms.scripts.ScriptConstants.LINE_SEPARATOR;
@@ -43,8 +40,8 @@ public class KmsSymmetricJweCompactEncrypterScript {
     }
 
     private void execute(String[] args) throws Exception {
-        var options = buildOptions();
-        var cmd = new DefaultParser().parse(options, args);
+        Options options = buildOptions();
+        CommandLine cmd = new DefaultParser().parse(options, args);
 
         if (cmd.hasOption(KmsSymmetricJweCompactEncrypterScriptOptionNames.HELP)) {
 
@@ -66,7 +63,7 @@ public class KmsSymmetricJweCompactEncrypterScript {
                     KmsSymmetricJweCompactEncrypterScriptOptionNames.HELP);
         } else {
 
-            var jweObject = encrypt(
+            JWEObject jweObject = encrypt(
                     JWEAlgorithm.parse(cmd.getOptionValue(KmsSymmetricJweCompactEncrypterScriptOptionNames.ALG)),
                     EncryptionMethod.parse(cmd.getOptionValue(KmsSymmetricJweCompactEncrypterScriptOptionNames.ENC)),
                     cmd.getOptionValue(KmsSymmetricJweCompactEncrypterScriptOptionNames.KID),
@@ -76,7 +73,7 @@ public class KmsSymmetricJweCompactEncrypterScript {
     }
 
     private Options buildOptions() {
-        var options = new Options();
+        Options options = new Options();
 
         options.addOption(Option.builder()
                 .longOpt(KmsSymmetricJweCompactEncrypterScriptOptionNames.HELP)
@@ -114,8 +111,8 @@ public class KmsSymmetricJweCompactEncrypterScript {
     private JWEObject encrypt(
             final JWEAlgorithm alg, final EncryptionMethod enc, final String kid, final String payload)
             throws Exception {
-        var jweEncrypter = new KmsSymmetricEncrypter(KmsClient.create(), kid);
-        var jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).keyID(kid).build(), new Payload(payload));
+        KmsSymmetricEncrypter jweEncrypter = new KmsSymmetricEncrypter(KmsClient.create(), kid);
+        JWEObject jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).keyID(kid).build(), new Payload(payload));
         jweObject.encrypt(jweEncrypter);
         return jweObject;
     }

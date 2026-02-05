@@ -25,7 +25,6 @@ import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,7 +118,6 @@ public class KmsDefaultDecrypterTest {
         private Base64URL testAuthTag = random.nextObject(Base64URL.class);
 
         @BeforeEach
-        @SneakyThrows
         void beforeEach() {
             kmsDefaultDecrypter = spy(new KmsDefaultDecrypter(mockAwsKms, testKeyId, testEncryptionContext,
                     testDeferredCriticalHeaders));
@@ -130,8 +128,7 @@ public class KmsDefaultDecrypterTest {
         class WithMissingCriticalHeader {
 
             @BeforeEach
-            @SneakyThrows
-            void beforeEach() {
+            void beforeEach() throws NoSuchMethodException {
                 testJweHeader = new JWEHeader.Builder(
                         JWEAlgorithm.RSA_OAEP_256,
                         EncryptionMethod.A256GCM)
@@ -169,7 +166,6 @@ public class KmsDefaultDecrypterTest {
             private final byte[] expectedData = new byte[random.nextInt(512)];
 
             @BeforeEach
-            @SneakyThrows
             void beforeEach() {
                 testJweHeader = new JWEHeader.Builder(
                         JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.toString()),
@@ -193,7 +189,6 @@ public class KmsDefaultDecrypterTest {
             class WithExceptionThrownFromJWEDecrypterUtil {
 
                 @ParameterizedTest
-                @SneakyThrows
                 @DisplayName("should throw exception.")
                 @ValueSource(classes = {
                         JOSEException.class, RemoteKeySourceException.class, TemporaryJOSEException.class
@@ -215,8 +210,7 @@ public class KmsDefaultDecrypterTest {
             class WithDecryptionResultFromJWEDecrypterUtil {
 
                 @BeforeEach
-                @SneakyThrows
-                void beforeEach() {
+                void beforeEach() throws JOSEException {
                     when(mockAwsKms
                             .decrypt(DecryptRequest.builder()
                                     .encryptionContext(testEncryptionContext)
@@ -233,8 +227,7 @@ public class KmsDefaultDecrypterTest {
 
                 @Test
                 @DisplayName("should return decrypted data.")
-                @SneakyThrows
-                void shouldReturnDecryptedData() {
+                void shouldReturnDecryptedData() throws JOSEException {
                     final byte[] actualData = kmsDefaultDecrypter.decrypt(
                             testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null);
                     assertThat(actualData).isEqualTo(expectedData);
@@ -242,15 +235,13 @@ public class KmsDefaultDecrypterTest {
             }
 
             @AfterEach
-            @SneakyThrows
             void afterEach() {
                 mockContentCryptoProvider.close();
             }
         }
 
         @AfterEach
-        @SneakyThrows
-        void afterEach() {
+        void afterEach() throws NoSuchMethodException {
             ReflectionSupport.invokeMethod(
                     kmsDefaultDecrypter.getClass().getSuperclass()
                             .getDeclaredMethod("validateJWEHeader", JWEHeader.class),

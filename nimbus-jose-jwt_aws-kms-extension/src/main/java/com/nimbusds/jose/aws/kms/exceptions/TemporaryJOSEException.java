@@ -17,7 +17,7 @@
 package com.nimbusds.jose.aws.kms.exceptions;
 
 import com.nimbusds.jose.JOSEException;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * This exception is thrown when a temporary (i.e. retryable) error occurs during any cryptographic operation.

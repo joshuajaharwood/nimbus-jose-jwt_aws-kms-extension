@@ -23,9 +23,8 @@ import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
+import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
-import lombok.var;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,8 +74,7 @@ class KmsSymmetricEncrypterTest {
         private final byte[] testClearText = new byte[random.nextInt(512)];
 
         @BeforeEach
-        @SneakyThrows
-        void beforeEach() {
+        void beforeEach() throws NoSuchMethodException {
             random.nextBytes(testClearText);
             testJweHeader = new JWEHeader.Builder(
                     JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.toString()),
@@ -94,7 +92,7 @@ class KmsSymmetricEncrypterTest {
         class WithInvalidKMSKeyException {
 
             KmsException parameterizedBeforeEach(final Class<KmsException> invalidKeyExceptionClass) {
-                final var invalidKeyException = mock(invalidKeyExceptionClass);
+                final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
                 when(mockAwsKms
                         .generateDataKey(GenerateDataKeyRequest.builder()
                                 .keyId(testKeyId)
@@ -114,7 +112,7 @@ class KmsSymmetricEncrypterTest {
                     NotFoundException.class, DisabledException.class, InvalidKeyUsageException.class,
                     KeyUnavailableException.class, KmsInvalidStateException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
-                final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
+                final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
                 assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null))
                         .isInstanceOf(RemoteKeySourceException.class)
                         .hasMessage("An exception was thrown from KMS due to invalid key.")
@@ -127,7 +125,7 @@ class KmsSymmetricEncrypterTest {
         class WithTemporaryKMSException {
 
             KmsException parameterizedBeforeEach(final Class<KmsException> temporaryKMSExceptionClass) {
-                final var temporaryKMSException = mock(temporaryKMSExceptionClass);
+                final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
                 when(mockAwsKms
                         .generateDataKey(GenerateDataKeyRequest.builder()
                                 .keyId(testKeyId)
@@ -147,7 +145,7 @@ class KmsSymmetricEncrypterTest {
                     DependencyTimeoutException.class, InvalidGrantTokenException.class,
                     KmsInternalException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
-                final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
+                final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
                 assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(TemporaryJOSEException.class)
                         .hasMessage("A temporary error was thrown from KMS.")
@@ -185,8 +183,7 @@ class KmsSymmetricEncrypterTest {
             class WithoutEncryptionContext {
 
                 @BeforeEach
-                @SneakyThrows
-                void beforeEach() {
+                void beforeEach() throws NoSuchMethodException {
                     reset(kmsSymmetricEncrypter);
                     kmsSymmetricEncrypter = spy(new KmsSymmetricEncrypter(mockAwsKms, testKeyId));
                     ReflectionSupport.invokeMethod(
@@ -195,7 +192,7 @@ class KmsSymmetricEncrypterTest {
                             doNothing().when(kmsSymmetricEncrypter),
                             testJweHeader);
 
-                    final var jcaContext = kmsSymmetricEncrypter.getJCAContext();
+                    final JWEJCAContext jcaContext = kmsSymmetricEncrypter.getJCAContext();
                     mockContentCryptoProvider.when(
                                     () -> ContentCryptoProvider.encrypt(
                                             testJweHeader,
@@ -220,8 +217,7 @@ class KmsSymmetricEncrypterTest {
 
                 @Test
                 @DisplayName("should encrypt JWE token.")
-                @SneakyThrows
-                void shouldReturnEncryptedJWEToken() {
+                void shouldReturnEncryptedJWEToken() throws JOSEException {
                     final JWECryptoParts actualJweCryptoParts =
                             kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null);
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
@@ -235,7 +231,7 @@ class KmsSymmetricEncrypterTest {
 
                 @BeforeEach
                 void beforeEach() {
-                    final var jcaContext = kmsSymmetricEncrypter.getJCAContext();
+                    final JWEJCAContext jcaContext = kmsSymmetricEncrypter.getJCAContext();
                     mockContentCryptoProvider.when(
                                     () -> ContentCryptoProvider.encrypt(
                                             refEq(new JWEHeader.Builder(testJweHeader)
@@ -257,8 +253,7 @@ class KmsSymmetricEncrypterTest {
 
                 @Test
                 @DisplayName("should encrypt JWE token.")
-                @SneakyThrows
-                void shouldReturnEncryptedJWEToken() {
+                void shouldReturnEncryptedJWEToken() throws JOSEException {
                     final JWECryptoParts actualJweCryptoParts =
                             kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null);
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
@@ -273,8 +268,7 @@ class KmsSymmetricEncrypterTest {
         }
 
         @AfterEach
-        @SneakyThrows
-        void afterEach() {
+        void afterEach() throws NoSuchMethodException {
             ReflectionSupport.invokeMethod(
                     kmsSymmetricEncrypter.getClass().getSuperclass()
                             .getDeclaredMethod("validateJWEHeader", JWEHeader.class),

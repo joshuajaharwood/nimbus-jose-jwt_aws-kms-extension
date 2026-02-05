@@ -17,14 +17,13 @@
 package com.nimbusds.jose.aws.kms.crypto;
 
 import com.google.common.collect.ImmutableSet;
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
-import lombok.var;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -135,8 +134,7 @@ public class KmsAsymmetricVerifierTest {
             testSignature = random.nextObject(Base64URL.class);
         }
 
-        @SneakyThrows
-        private void mockGetMessage() {
+        private void mockGetMessage() throws NoSuchMethodException {
             ReflectionSupport.invokeMethod(
                     kmsAsymmetricVerifier.getClass().getSuperclass()
                             .getDeclaredMethod("getMessage", JWSHeader.class, byte[].class),
@@ -157,8 +155,7 @@ public class KmsAsymmetricVerifierTest {
 
             @Test
             @DisplayName("should return false.")
-            @SneakyThrows
-            void shouldReturnFalse() {
+            void shouldReturnFalse() throws JOSEException {
                 final boolean result =
                         kmsAsymmetricVerifier.verify(testJweHeader, testSigningInput, testSignature);
                 assertThat(result).isFalse();
@@ -170,7 +167,7 @@ public class KmsAsymmetricVerifierTest {
         class WithCriticalHeaderPass {
 
             @BeforeEach
-            void beforeEach() {
+            void beforeEach() throws NoSuchMethodException {
                 kmsAsymmetricVerifier = spy(new KmsAsymmetricVerifier(
                         mockAwsKms, testPrivateKeyId, testMessageType, testCriticalHeaders));
                 mockGetMessage();
@@ -180,9 +177,8 @@ public class KmsAsymmetricVerifierTest {
             @DisplayName("with invalid signing key,")
             class WithInvalidSigningKey {
 
-                @SneakyThrows
                 KmsException parameterizedBeforeEach(Class<KmsException> invalidSigningExceptionClass) {
-                    final var mockInvalidSigningException = mock(invalidSigningExceptionClass);
+                    final KmsException mockInvalidSigningException = mock(invalidSigningExceptionClass);
                     when(mockAwsKms
                             .verify(VerifyRequest.builder()
                                     .keyId(testPrivateKeyId)
@@ -201,7 +197,7 @@ public class KmsAsymmetricVerifierTest {
                         NotFoundException.class, DisabledException.class, KeyUnavailableException.class,
                         InvalidKeyUsageException.class, KmsInvalidStateException.class})
                 void shouldThrowRemoteKeySourceException(Class<KmsException> exceptionClass) {
-                    final var mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
+                    final KmsException mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
                     assertThatThrownBy(
                             () -> kmsAsymmetricVerifier.verify(testJweHeader, testSigningInput, testSignature))
                             .isInstanceOf(RemoteKeySourceException.class)
@@ -214,9 +210,8 @@ public class KmsAsymmetricVerifierTest {
             @DisplayName("with temporary exception from KMS,")
             class WithTemporaryExceptionFromKms {
 
-                @SneakyThrows
                 KmsException parameterizedBeforeEach(Class<KmsException> temporaryKmsExceptionClass) {
-                    final var mockTemporaryKmsException = mock(temporaryKmsExceptionClass);
+                    final KmsException mockTemporaryKmsException = mock(temporaryKmsExceptionClass);
                     when(mockAwsKms
                             .verify(VerifyRequest.builder()
                                     .keyId(testPrivateKeyId)
@@ -234,7 +229,7 @@ public class KmsAsymmetricVerifierTest {
                 @ValueSource(classes = {
                         DependencyTimeoutException.class, InvalidGrantTokenException.class, KmsInternalException.class})
                 void shouldThrowJOSEException(Class<KmsException> exceptionClass) {
-                    final var mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
+                    final KmsException mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
                     assertThatThrownBy(
                             () -> kmsAsymmetricVerifier.verify(testJweHeader, testSigningInput, testSignature))
                             .isInstanceOf(TemporaryJOSEException.class)
@@ -265,8 +260,7 @@ public class KmsAsymmetricVerifierTest {
 
                 @Test
                 @DisplayName("should return false.")
-                @SneakyThrows
-                void shouldReturnFalse() {
+                void shouldReturnFalse() throws JOSEException {
                     final boolean result =
                             kmsAsymmetricVerifier.verify(testJweHeader, testSigningInput, testSignature);
                     assertThat(result).isFalse();
@@ -297,8 +291,7 @@ public class KmsAsymmetricVerifierTest {
 
                 @Test
                 @DisplayName("should return false.")
-                @SneakyThrows
-                void shouldReturnFalse() {
+                void shouldReturnFalse() throws JOSEException {
                     final boolean result =
                             kmsAsymmetricVerifier.verify(testJweHeader, testSigningInput, testSignature);
                     assertThat(result).isFalse();
@@ -329,8 +322,7 @@ public class KmsAsymmetricVerifierTest {
 
                 @Test
                 @DisplayName("should return true.")
-                @SneakyThrows
-                void shouldReturnTrue() {
+                void shouldReturnTrue() throws JOSEException {
                     final boolean result =
                             kmsAsymmetricVerifier.verify(testJweHeader, testSigningInput, testSignature);
                     assertThat(result).isTrue();

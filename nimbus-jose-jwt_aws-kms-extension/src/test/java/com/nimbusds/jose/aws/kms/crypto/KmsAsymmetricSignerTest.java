@@ -16,13 +16,12 @@
 
 package com.nimbusds.jose.aws.kms.crypto;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
-import lombok.var;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,8 +76,7 @@ public class KmsAsymmetricSignerTest {
         private ByteBuffer mockMessage;
 
         @BeforeEach
-        @SneakyThrows
-        void beforeEach() {
+        void beforeEach() throws NoSuchMethodException {
             testJweHeader = new JWSHeader.Builder(JWSAlgorithm.PS512).build();
 
             testSigningInput = new byte[random.nextInt(512)];
@@ -99,9 +97,8 @@ public class KmsAsymmetricSignerTest {
         @DisplayName("with invalid signing key,")
         class WithInvalidSigningKey {
 
-            @SneakyThrows
             KmsException parameterizedBeforeEach(Class<KmsException> invalidSigningExceptionClass) {
-                final var mockInvalidSigningException = mock(invalidSigningExceptionClass);
+                final KmsException mockInvalidSigningException = mock(invalidSigningExceptionClass);
                 when(mockAwsKms
                         .sign(SignRequest.builder()
                                 .keyId(testPrivateKeyId)
@@ -119,7 +116,7 @@ public class KmsAsymmetricSignerTest {
                     NotFoundException.class, DisabledException.class, KeyUnavailableException.class,
                     InvalidKeyUsageException.class, KmsInvalidStateException.class})
             void shouldThrowRemoteKeySourceException(Class<KmsException> exceptionClass) {
-                final var mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
+                final KmsException mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
                 assertThatThrownBy(() -> kmsAsymmetricSigner.sign(testJweHeader, testSigningInput))
                         .isInstanceOf(RemoteKeySourceException.class)
                         .hasMessage("An exception was thrown from KMS due to invalid key.")
@@ -131,9 +128,8 @@ public class KmsAsymmetricSignerTest {
         @DisplayName("with temporary exception from KMS,")
         class WithTemporaryExceptionFromKms {
 
-            @SneakyThrows
             KmsException parameterizedBeforeEach(Class<KmsException> temporaryKmsExceptionClass) {
-                final var mockTemporaryKmsException = mock(temporaryKmsExceptionClass);
+                final KmsException mockTemporaryKmsException = mock(temporaryKmsExceptionClass);
                 when(mockAwsKms
                         .sign(SignRequest.builder()
                                 .keyId(testPrivateKeyId)
@@ -150,7 +146,7 @@ public class KmsAsymmetricSignerTest {
             @ValueSource(classes = {
                     DependencyTimeoutException.class, InvalidGrantTokenException.class, KmsInternalException.class})
             void shouldThrowJOSEException(Class<KmsException> exceptionClass) {
-                final var mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
+                final KmsException mockInvalidSigningException = parameterizedBeforeEach(exceptionClass);
                 assertThatThrownBy(() -> kmsAsymmetricSigner.sign(testJweHeader, testSigningInput))
                         .isInstanceOf(TemporaryJOSEException.class)
                         .hasMessage("A temporary exception was thrown from KMS.")
@@ -178,7 +174,7 @@ public class KmsAsymmetricSignerTest {
                                 .build()))
                         .thenReturn(mockSignResponse);
 
-                final var testSignatureByteBuffer = ByteBuffer.allocate(random.nextInt(512));
+                final ByteBuffer testSignatureByteBuffer = ByteBuffer.allocate(random.nextInt(512));
                 random.nextBytes(testSignatureByteBuffer.array());
                 when(mockSignResponse.signature()).thenReturn(SdkBytes.fromByteBuffer(testSignatureByteBuffer));
                 expectedSignature = Base64URL.encode(testSignatureByteBuffer.array());
@@ -186,9 +182,8 @@ public class KmsAsymmetricSignerTest {
 
             @Test
             @DisplayName("should return based-64-URL encoded signature.")
-            @SneakyThrows
-            void shouldReturnValidResponse() {
-                final var actualSignature = kmsAsymmetricSigner.sign(testJweHeader, testSigningInput);
+            void shouldReturnValidResponse() throws JOSEException {
+                final Base64URL actualSignature = kmsAsymmetricSigner.sign(testJweHeader, testSigningInput);
                 assertThat(actualSignature).isEqualTo(expectedSignature);
             }
         }

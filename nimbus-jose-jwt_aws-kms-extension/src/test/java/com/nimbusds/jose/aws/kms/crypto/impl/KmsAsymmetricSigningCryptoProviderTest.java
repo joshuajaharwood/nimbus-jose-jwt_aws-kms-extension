@@ -19,7 +19,6 @@ package com.nimbusds.jose.aws.kms.crypto.impl;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import lombok.SneakyThrows;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,8 +122,7 @@ public class KmsAsymmetricSigningCryptoProviderTest {
 
                 @Test
                 @DisplayName("should return message ByteBuffer.")
-                @SneakyThrows
-                void shouldReturnMessageByteBuffer() {
+                void shouldReturnMessageByteBuffer() throws JOSEException {
                     ByteBuffer actualMessage = kmsAsymmetricSigningCryptoProvider.getMessage(testJwsHeader, testSigningInputBytes);
                     assertThat(actualMessage).isEqualTo(expectedMessage);
                 }
@@ -152,7 +150,6 @@ public class KmsAsymmetricSigningCryptoProviderTest {
                     private NoSuchAlgorithmException mockNoSuchAlgorithmException;
 
                     @BeforeEach
-                    @SneakyThrows
                     void beforeEach() {
                         mockMessageDigest
                                 .when(() -> MessageDigest.getInstance(
@@ -182,7 +179,6 @@ public class KmsAsymmetricSigningCryptoProviderTest {
                     private ByteBuffer expectedDigestMessage;
 
                     @BeforeEach
-                    @SneakyThrows
                     void beforeEach() {
                         mockMessageDigest
                                 .when(() -> MessageDigest.getInstance(
@@ -198,8 +194,7 @@ public class KmsAsymmetricSigningCryptoProviderTest {
 
                     @Test
                     @DisplayName("should return message ByteBuffer.")
-                    @SneakyThrows
-                    void shouldReturnMessageByteBuffer() {
+                    void shouldReturnMessageByteBuffer() throws JOSEException {
                         ByteBuffer actualMessage = kmsAsymmetricSigningCryptoProvider.getMessage(testJwsHeader,
                                 testSigningInputBytes);
                         assertThat(actualMessage).isEqualTo(expectedDigestMessage);

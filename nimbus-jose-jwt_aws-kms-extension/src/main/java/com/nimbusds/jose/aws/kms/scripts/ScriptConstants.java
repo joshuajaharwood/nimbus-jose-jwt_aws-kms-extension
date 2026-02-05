@@ -14,13 +14,12 @@
   limitations under the License.
  */
 
-
 package com.nimbusds.jose.aws.kms.scripts;
 
-import lombok.experimental.UtilityClass;
+public final class ScriptConstants {
+    private ScriptConstants() {
+    }
 
-@UtilityClass
-public class ScriptConstants {
     public static final String LINE_SEPARATOR = "\n***********************************************\n";
 
     public static final String MESSAGE_TYPE = "messageType";

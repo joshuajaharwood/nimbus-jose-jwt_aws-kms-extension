@@ -18,11 +18,8 @@ package com.nimbusds.jose.aws.kms.scripts;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.KmsDefaultEncrypter;
-import lombok.var;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.*;
 import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import static com.nimbusds.jose.aws.kms.scripts.ScriptConstants.LINE_SEPARATOR;
@@ -43,8 +40,8 @@ public class KmsDefaultJweCompactEncrypterScript {
     }
 
     private void execute(String[] args) throws Exception {
-        var options = buildOptions();
-        var cmd = new DefaultParser().parse(options, args);
+        Options options = buildOptions();
+        CommandLine cmd = new DefaultParser().parse(options, args);
 
         if (cmd.hasOption(KmsDefaultJweCompactEncrypterScriptOptionNames.HELP)) {
 
@@ -66,7 +63,7 @@ public class KmsDefaultJweCompactEncrypterScript {
                     KmsDefaultJweCompactEncrypterScriptOptionNames.HELP);
         } else {
 
-            var jweObject = encrypt(
+            JWEObject jweObject = encrypt(
                     JWEAlgorithm.parse(cmd.getOptionValue(KmsDefaultJweCompactEncrypterScriptOptionNames.ALG)),
                     EncryptionMethod.parse(cmd.getOptionValue(KmsDefaultJweCompactEncrypterScriptOptionNames.ENC)),
                     cmd.getOptionValue(KmsDefaultJweCompactEncrypterScriptOptionNames.KID),
@@ -76,7 +73,7 @@ public class KmsDefaultJweCompactEncrypterScript {
     }
 
     private Options buildOptions() {
-        var options = new Options();
+        Options options = new Options();
 
         options.addOption(Option.builder()
                 .longOpt(KmsDefaultJweCompactEncrypterScriptOptionNames.HELP)
@@ -114,8 +111,8 @@ public class KmsDefaultJweCompactEncrypterScript {
     private JWEObject encrypt(
             final JWEAlgorithm alg, final EncryptionMethod enc, final String kid, final String payload)
             throws Exception {
-        var jweEncrypter = new KmsDefaultEncrypter(KmsClient.create(), kid);
-        var jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).keyID(kid).build(), new Payload(payload));
+        KmsDefaultEncrypter jweEncrypter = new KmsDefaultEncrypter(KmsClient.create(), kid);
+        JWEObject jweObject = new JWEObject(new JWEHeader.Builder(alg, enc).keyID(kid).build(), new Payload(payload));
         jweObject.encrypt(jweEncrypter);
         return jweObject;
     }

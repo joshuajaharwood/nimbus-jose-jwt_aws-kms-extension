@@ -27,8 +27,6 @@ import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
-import lombok.var;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,8 +77,7 @@ class KmsDefaultEncrypterTest {
         private final byte[] testClearText = new byte[random.nextInt(512)];
 
         @BeforeEach
-        @SneakyThrows
-        void beforeEach() {
+        void beforeEach() throws NoSuchMethodException {
             random.nextBytes(testClearText);
             testJweHeader = new JWEHeader.Builder(
                     JWEAlgorithm.RSA_OAEP_256,
@@ -98,7 +95,7 @@ class KmsDefaultEncrypterTest {
         class WithInvalidKMSKeyException {
 
             KmsException parameterizedBeforeEach(final Class<KmsException> invalidKeyExceptionClass) {
-                final var invalidKeyException = mock(invalidKeyExceptionClass);
+                final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
                 when(mockAwsKms
                         .encrypt(EncryptRequest.builder()
                                 .keyId(testKeyId)
@@ -117,7 +114,7 @@ class KmsDefaultEncrypterTest {
                     NotFoundException.class, DisabledException.class, InvalidKeyUsageException.class,
                     KmsInvalidStateException.class, InvalidGrantTokenException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
-                final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
+                final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
                 assertThatThrownBy(() -> kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(RemoteKeySourceException.class)
                         .hasMessage("An exception was thrown from KMS due to invalid client request.")
@@ -130,7 +127,7 @@ class KmsDefaultEncrypterTest {
         class WithTemporaryKMSException {
 
             KmsException parameterizedBeforeEach(final Class<KmsException> temporaryKMSExceptionClass) {
-                final var temporaryKMSException = mock(temporaryKMSExceptionClass);
+                final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
                 when(mockAwsKms
                         .encrypt(EncryptRequest.builder()
                                 .keyId(testKeyId)
@@ -148,7 +145,7 @@ class KmsDefaultEncrypterTest {
             @ValueSource(classes = {
                     DependencyTimeoutException.class, KeyUnavailableException.class, KmsInternalException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
-                final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
+                final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
                 assertThatThrownBy(() -> kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(TemporaryJOSEException.class)
                         .hasMessage("A temporary error was thrown from KMS.")
@@ -209,8 +206,7 @@ class KmsDefaultEncrypterTest {
             class WithoutEncryptionContext {
 
                 @BeforeEach
-                @SneakyThrows
-                void beforeEach() {
+                void beforeEach() throws NoSuchMethodException {
                     reset(kmsDefaultEncrypter);
                     kmsDefaultEncrypter = spy(new KmsDefaultEncrypter(mockAwsKms, testKeyId));
                     when(kmsDefaultEncrypter.getJCAContext()).thenReturn(mockJWEJCAContext);
@@ -245,8 +241,7 @@ class KmsDefaultEncrypterTest {
 
                 @Test
                 @DisplayName("should encrypt JWE token.")
-                @SneakyThrows
-                void shouldReturnEncryptedJWEToken() {
+                void shouldReturnEncryptedJWEToken() throws JOSEException {
                     final JWECryptoParts actualJweCryptoParts =
                             kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader));
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
@@ -278,8 +273,7 @@ class KmsDefaultEncrypterTest {
 
                 @Test
                 @DisplayName("should encrypt JWE token.")
-                @SneakyThrows
-                void shouldReturnEncryptedJWEToken() {
+                void shouldReturnEncryptedJWEToken() throws JOSEException {
                     final JWECryptoParts actualJweCryptoParts =
                             kmsDefaultEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader));
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
@@ -288,8 +282,7 @@ class KmsDefaultEncrypterTest {
         }
 
         @AfterEach
-        @SneakyThrows
-        void afterEach() {
+        void afterEach() throws NoSuchMethodException {
             ReflectionSupport.invokeMethod(
                     kmsDefaultEncrypter.getClass().getSuperclass()
                             .getDeclaredMethod("validateJWEHeader", JWEHeader.class),

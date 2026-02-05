@@ -1,16 +1,11 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
-import com.nimbusds.jose.EncryptionMethod;
-import com.nimbusds.jose.JWEAlgorithm;
-import com.nimbusds.jose.JWEHeader;
-import com.nimbusds.jose.RemoteKeySourceException;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import lombok.SneakyThrows;
-import lombok.var;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -80,7 +75,7 @@ public class JWEDecrypterUtilTest {
     class WithInvalidKMSKeyException {
 
       KmsException parameterizedBeforeEach(final Class<KmsException> invalidKeyExceptionClass) {
-        final var invalidKeyException = mock(invalidKeyExceptionClass);
+        final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
                                        .encryptionContext(testEncryptionContext)
@@ -99,7 +94,7 @@ public class JWEDecrypterUtilTest {
               NotFoundException.class, DisabledException.class, InvalidKeyUsageException.class,
               KeyUnavailableException.class, KmsInvalidStateException.class})
       void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
-        final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
+        final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
                 () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext, testJweHeader,
                         testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext))
@@ -114,7 +109,7 @@ public class JWEDecrypterUtilTest {
     class WithTemporaryKMSException {
 
       KmsException parameterizedBeforeEach(final Class<KmsException> temporaryKMSExceptionClass) {
-        final var temporaryKMSException = mock(temporaryKMSExceptionClass);
+        final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
                                        .encryptionContext(testEncryptionContext)
@@ -133,7 +128,7 @@ public class JWEDecrypterUtilTest {
               DependencyTimeoutException.class, InvalidGrantTokenException.class,
               KmsInternalException.class})
       void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
-        final var invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
+        final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
                 () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext, testJweHeader,
                         testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext))
@@ -174,10 +169,9 @@ public class JWEDecrypterUtilTest {
       }
 
       @ParameterizedTest
-      @SneakyThrows
       @DisplayName("should return decrypted data,")
       @MethodSource("com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtilTest#supportedJWEAlgInHeader")
-      void shouldReturnDecryptedData(final JWEHeader jweHeader) {
+      void shouldReturnDecryptedData(final JWEHeader jweHeader) throws JOSEException {
         parameterizedBeforeEach(jweHeader);
         final byte[] actualData = JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
                 jweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext);
@@ -185,7 +179,6 @@ public class JWEDecrypterUtilTest {
       }
 
       @AfterEach
-      @SneakyThrows
       void afterEach() {
         mockContentCryptoProvider.close();
       }
