@@ -96,7 +96,7 @@ public class JWEDecrypterUtilTest {
       void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
         final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
-                () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext, testJweHeader,
+                () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testJweHeader,
                         testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext))
                 .isInstanceOf(RemoteKeySourceException.class)
                 .hasMessage("An exception was thrown from KMS due to invalid key.")
@@ -130,7 +130,7 @@ public class JWEDecrypterUtilTest {
       void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
         final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
-                () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext, testJweHeader,
+                () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testJweHeader,
                         testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext))
                 .isInstanceOf(TemporaryJOSEException.class)
                 .hasMessage("A temporary error was thrown from KMS.")
@@ -173,7 +173,7 @@ public class JWEDecrypterUtilTest {
       @MethodSource("com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtilTest#supportedJWEAlgInHeader")
       void shouldReturnDecryptedData(final JWEHeader jweHeader) throws JOSEException {
         parameterizedBeforeEach(jweHeader);
-        final byte[] actualData = JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
+        final byte[] actualData = JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
                 jweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext);
         assertThat(actualData).isEqualTo(expectedData);
       }

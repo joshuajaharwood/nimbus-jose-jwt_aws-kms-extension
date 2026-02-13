@@ -118,7 +118,7 @@ class KmsSymmetricDecrypterTest {
 
         @BeforeEach
         void beforeEach() {
-            kmsSymmetricDecrypter = spy(new KmsSymmetricDecrypter(mockAwsKms, testKeyId, testEncryptionContext,
+            kmsSymmetricDecrypter = spy(new KmsSymmetricDecrypter(mockAwsKms, testKeyId,
                     testDeferredCriticalHeaders));
         }
 
@@ -194,8 +194,8 @@ class KmsSymmetricDecrypterTest {
                 })
                 void shouldThrowException(final Class<Throwable> exceptionClass) {
                     try (MockedStatic<JWEDecrypterUtil> utilMockedStatic = mockStatic(JWEDecrypterUtil.class)) {
-                        utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
-                                        testJweHeader, testEncryptedKey, testIv, testCipherText,
+                        utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
+                                                testJweHeader, testEncryptedKey, testIv, testCipherText,
                                         testAuthTag, null, mockJWEJCAContext))
                                 .thenThrow(exceptionClass);
                         assertThrows(exceptionClass, () -> kmsSymmetricDecrypter.decrypt(
@@ -218,7 +218,7 @@ class KmsSymmetricDecrypterTest {
                                     .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
                                     .build()))
                             .thenReturn(testDecryptResponse);
-                    when(JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testEncryptionContext,
+                    when(JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
                             testJweHeader, testEncryptedKey, testIv, testCipherText,
                             testAuthTag, null, mockJWEJCAContext))
                             .thenReturn(expectedData);

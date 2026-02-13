@@ -5,6 +5,7 @@ import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
+import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DecryptRequest;
@@ -40,17 +41,16 @@ public final class JWEDecrypterUtil {
     public static byte[] decrypt(
             KmsClient kms,
             String keyId,
-            Map<String, String> encryptionContext,
             JWEHeader header,
             Base64URL encryptedKey,
             Base64URL iv,
             Base64URL cipherText,
             Base64URL authTag,
-            byte[] aad,
+            byte @NonNull [] aad,
             JWEJCAContext jcaContext)
             throws JOSEException {
 
-        Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad, encryptionContext);
+        Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad);
 
         final DecryptResponse cekDecryptResult =
                 decryptCek(kms, keyId, kmsEncryptionContext, header.getAlgorithm(), encryptedKey);

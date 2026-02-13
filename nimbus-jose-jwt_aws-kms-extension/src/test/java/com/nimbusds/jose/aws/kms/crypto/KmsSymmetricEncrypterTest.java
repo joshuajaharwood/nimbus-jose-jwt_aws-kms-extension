@@ -57,13 +57,12 @@ class KmsSymmetricEncrypterTest {
     @Mock
     private KmsClient mockAwsKms;
     private final String testKeyId = random.nextObject(String.class);
-    private final Map<String, String> testEncryptionContext = random.nextObject(Map.class);
 
     private KmsSymmetricEncrypter kmsSymmetricEncrypter;
 
     @BeforeEach
     void beforeEach() {
-        kmsSymmetricEncrypter = spy(new KmsSymmetricEncrypter(mockAwsKms, testKeyId, testEncryptionContext));
+        kmsSymmetricEncrypter = spy(new KmsSymmetricEncrypter(mockAwsKms, testKeyId));
     }
 
     @Nested

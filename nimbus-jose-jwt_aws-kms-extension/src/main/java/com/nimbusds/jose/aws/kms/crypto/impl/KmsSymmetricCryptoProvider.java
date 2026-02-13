@@ -53,14 +53,6 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
     private final String keyId;
 
     /**
-     * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
-     * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
-     */
-
-    //todo: i think we can remove this and just convert the byte array argument...
-    private Map<String, String> encryptionContext;
-
-    /**
      * The supported JWE algorithms (alg) by the AWS crypto provider class.
      * <p>
      * Note: We are using KMS prescribed algorithm names here.
@@ -94,12 +86,6 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
         this.keyId = keyId;
     }
 
-    protected KmsSymmetricCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId,
-                                         @NonNull final Map<String, String> encryptionContext) {
-        this(kms, keyId);
-        this.encryptionContext = ImmutableMap.copyOf(encryptionContext);
-    }
-
     protected void validateJWEHeader(@NonNull final JWEHeader header) throws JOSEException {
         JWEHeaderUtil.validateJWEHeaderAlgorithms(header, SUPPORTED_ALGORITHMS, SUPPORTED_ENCRYPTION_METHODS);
     }
@@ -114,7 +100,4 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
         return this.keyId;
     }
 
-    protected Map<String, String> getEncryptionContext() {
-        return this.encryptionContext;
-    }
 }

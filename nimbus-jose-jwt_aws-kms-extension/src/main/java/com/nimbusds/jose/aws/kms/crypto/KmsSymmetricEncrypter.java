@@ -19,7 +19,6 @@ package com.nimbusds.jose.aws.kms.crypto;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
-import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
@@ -30,7 +29,6 @@ import software.amazon.awssdk.services.kms.model.*;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.Map;
 
 /**
  * Encrypter implementation for SYMMETRIC (AES based) signing with public/private key stored in AWS KMS.
@@ -43,11 +41,6 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
 
     public KmsSymmetricEncrypter(@NonNull final KmsClient kms, @NonNull final String keyId) {
         super(kms, keyId);
-    }
-
-    public KmsSymmetricEncrypter(@NonNull final KmsClient kms, @NonNull final String keyId,
-                                 @NonNull final Map<String, String> encryptionContext) {
-        super(kms, keyId, encryptionContext);
     }
 
     @Override
@@ -74,7 +67,7 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
             return getKms().generateDataKey(GenerateDataKeyRequest.builder()
                     .keyId(keyId)
                     .keySpec(ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(encryptionMethod))
-                    .encryptionContext(AadEncryptionContextAdapter.aadToEncryptionContext(aad, getEncryptionContext()))
+                    .encryptionContext(AadEncryptionContextAdapter.aadToEncryptionContext(aad))
                     .build());
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException
                  | KmsInvalidStateException e) {

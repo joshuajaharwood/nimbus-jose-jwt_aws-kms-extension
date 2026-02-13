@@ -66,7 +66,7 @@ class KmsDefaultEncrypterTest {
 
     @BeforeEach
     void beforeEach() {
-        kmsDefaultEncrypter = spy(new KmsDefaultEncrypter(mockAwsKms, testKeyId, testEncryptionContext));
+        kmsDefaultEncrypter = spy(new KmsDefaultEncrypter(mockAwsKms, testKeyId));
     }
 
     @Nested

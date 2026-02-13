@@ -50,12 +50,6 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
   private final String keyId;
 
   /**
-   * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
-   * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
-   */
-  private Map<String, String> encryptionContext;
-
-  /**
    * The supported JWE algorithms (alg) by the AWS crypto provider class.
    * <p>
    * Note: We accept both the algorithms defined in RFC-7518 and KMS-defined strings.
@@ -80,11 +74,6 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
     this.keyId = keyId;
   }
 
-  protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId, @NonNull final Map<String, String> encryptionContext) {
-    this(kms, keyId);
-    this.encryptionContext = ImmutableMap.copyOf(encryptionContext);
-  }
-
   protected void validateJWEHeader(@NonNull final JWEHeader header) throws JOSEException {
     JWEHeaderUtil.validateJWEHeaderAlgorithms(header, SUPPORTED_ALGORITHMS, SUPPORTED_ENCRYPTION_METHODS);
   }
@@ -99,7 +88,4 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
     return this.keyId;
   }
 
-  protected Map<String, String> getEncryptionContext() {
-    return this.encryptionContext;
-  }
 }

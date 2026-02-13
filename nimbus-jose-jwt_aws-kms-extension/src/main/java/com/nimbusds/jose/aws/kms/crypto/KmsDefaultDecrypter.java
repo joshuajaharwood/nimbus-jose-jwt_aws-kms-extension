@@ -22,7 +22,6 @@ import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
-import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
 import org.jspecify.annotations.NonNull;
@@ -46,12 +45,6 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
     private final CriticalHeaderParamsDeferral critPolicy = new CriticalHeaderParamsDeferral();
 
     public KmsDefaultDecrypter(@NonNull final KmsClient kms,
-                               @NonNull final String keyId,
-                               @NonNull final Map<String, String> encryptionContext) {
-        super(kms, keyId, encryptionContext);
-    }
-
-    public KmsDefaultDecrypter(@NonNull final KmsClient kms,
                                @NonNull final String keyId) {
         super(kms, keyId);
     }
@@ -60,14 +53,6 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
                                @NonNull final String keyId,
                                @NonNull final Set<String> defCritHeaders) {
         this(kms, keyId);
-        critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
-    }
-
-    public KmsDefaultDecrypter(@NonNull final KmsClient kms,
-                               @NonNull final String keyId,
-                               @NonNull final Map<String, String> encryptionContext,
-                               @NonNull final Set<String> defCritHeaders) {
-        this(kms, keyId, encryptionContext);
         critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
     }
 
@@ -97,7 +82,7 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
         validateJWEHeader(header);
         critPolicy.ensureHeaderPasses(header);
 
-        return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), getEncryptionContext(), header, encryptedKey, iv,
+        return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
                 cipherText, authTag, aad, getJCAContext());
     }
 }

@@ -74,13 +74,6 @@ public class KmsSymmetricJweCompactDecrypterScript {
         return options;
     }
 
-
-//    @SuppressWarnings({"unchecked", "rawtypes"})
-//    private Map<String, String> getEncryptionContext(JWEHeader header) {
-//        return (Map) header.getCustomParam(KmsSymmetricCryptoProvider.ENCRYPTION_CONTEXT_HEADER);
-//    }
-
-
     private JWEObject decrypt(String serializedJwe)
             throws Exception {
 
