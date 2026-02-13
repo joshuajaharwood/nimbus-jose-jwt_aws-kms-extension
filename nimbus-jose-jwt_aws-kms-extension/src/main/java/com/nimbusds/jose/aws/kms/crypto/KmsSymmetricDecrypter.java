@@ -78,17 +78,6 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
         return critPolicy.getDeferredCriticalHeaderParams();
     }
 
-    @Deprecated
-    public byte[] decrypt(final JWEHeader header,
-                          final Base64URL encryptedKey,
-                          final Base64URL iv,
-                          final Base64URL cipherText,
-                          final Base64URL authTag)
-            throws JOSEException {
-
-        return decrypt(header, encryptedKey, iv, cipherText, authTag, AAD.compute(header));
-    }
-
     @Override
     public byte[] decrypt(
             @NonNull final JWEHeader header,
@@ -96,7 +85,7 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
             @NonNull final Base64URL iv,
             @NonNull final Base64URL cipherText,
             @NonNull final Base64URL authTag,
-            final byte[] aad)
+            final byte @NonNull [] aad)
             throws JOSEException {
 
         validateJWEHeader(header);

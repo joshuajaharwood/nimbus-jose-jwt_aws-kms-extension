@@ -1,6 +1,6 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
-import java.util.Base64;
+import com.nimbusds.jose.util.Base64URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,9 +42,7 @@ public class AadEncryptionContextAdapter {
 
     if (aad != null && aad.length > 0) {
       // Use base64url encoding without padding (standard for JOSE)
-      String encoded = Base64.getUrlEncoder()
-                             .withoutPadding()
-                             .encodeToString(aad);
+      String encoded = Base64URL.encode(aad).toString();
 
       if (encoded.length() > MAX_ENCODED_AAD_LENGTH) {
         throw new IllegalArgumentException("Encoded AAD length exceeds the maximum supported size for KMS encryption context (" + MAX_ENCODED_AAD_LENGTH + " characters)");
@@ -74,9 +72,7 @@ public class AadEncryptionContextAdapter {
 
     // Add AAD (will overwrite if user provided the same key, which is intentional)
     if (aad != null && aad.length > 0) {
-      String encoded = Base64.getUrlEncoder()
-                             .withoutPadding()
-                             .encodeToString(aad);
+      String encoded = Base64URL.encode(aad).toString();
 
       if (encoded.length() > MAX_ENCODED_AAD_LENGTH) {
         throw new IllegalArgumentException("Encoded AAD length exceeds the maximum supported size for KMS encryption context (" + MAX_ENCODED_AAD_LENGTH + " characters)");
@@ -105,7 +101,7 @@ public class AadEncryptionContextAdapter {
     }
 
     try {
-      return Base64.getUrlDecoder().decode(encoded);
+      return new Base64URL(encoded).decode();
     } catch (IllegalArgumentException e) {
       throw new IllegalArgumentException(
               "Failed to decode AAD from encryption context", e);
@@ -129,7 +125,7 @@ public class AadEncryptionContextAdapter {
     }
 
     try {
-      Base64.getUrlDecoder().decode(encoded);
+      new Base64URL(encoded).decode();
       return true;
     } catch (IllegalArgumentException e) {
       return false;

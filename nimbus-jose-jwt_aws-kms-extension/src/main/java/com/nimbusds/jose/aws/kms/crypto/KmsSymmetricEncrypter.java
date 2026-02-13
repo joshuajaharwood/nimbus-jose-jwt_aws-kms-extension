@@ -51,12 +51,11 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
     }
 
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte[] aad)
+    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte @NonNull[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);
 
-        final JWEHeader updatedHeader; // We need to work on the header
         final Base64URL encryptedKey; // The second JWE part
 
         // Generate and encrypt the CEK according to the enc method
@@ -65,10 +64,8 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
                 generateDataKeyResponse.plaintext().asByteArray(), header.getAlgorithm().toString());
 
         encryptedKey = Base64URL.encode(generateDataKeyResponse.ciphertextBlob().asByteArray());
-        updatedHeader = JWEHeaderUtil.getJWEHeaderWithEncryptionContext(
-                header, ENCRYPTION_CONTEXT_HEADER, getEncryptionContext());
 
-        return ContentCryptoProvider.encrypt(updatedHeader, clearText, aad, cek, encryptedKey, getJCAContext());
+        return ContentCryptoProvider.encrypt(header, clearText, aad, cek, encryptedKey, getJCAContext());
     }
 
     private GenerateDataKeyResponse generateDataKey(String keyId, EncryptionMethod encryptionMethod, byte[] aad)

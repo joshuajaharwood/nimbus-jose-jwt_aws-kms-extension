@@ -211,12 +211,7 @@ class KmsSymmetricEncrypterTest {
                     final JWEJCAContext jcaContext = kmsSymmetricEncrypter.getJCAContext();
                     mockContentCryptoProvider.when(
                                     () -> ContentCryptoProvider.encrypt(
-                                            refEq(new JWEHeader.Builder(testJweHeader)
-                                                    .customParams(ImmutableMap.of(
-                                                            KmsSymmetricCryptoProvider
-                                                                    .ENCRYPTION_CONTEXT_HEADER,
-                                                            testEncryptionContext))
-                                                    .build()),
+                                            eq(testJweHeader),
                                             eq(testClearText),
                                             isNull(),
                                             eq(new SecretKeySpec(

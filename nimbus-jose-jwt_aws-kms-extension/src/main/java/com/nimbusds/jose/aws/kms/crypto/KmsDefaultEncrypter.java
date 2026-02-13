@@ -52,31 +52,24 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
         super(kms, keyId, encryptionContext);
     }
 
-    @Deprecated
-    public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText) throws JOSEException {
-        return encrypt(header, clearText, AAD.compute(header));
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte[] aad)
+    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte @NonNull[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);
-        JWEHeader updatedHeader = JWEHeaderUtil.getJWEHeaderWithEncryptionContext(
-                header, ENCRYPTION_CONTEXT_HEADER, getEncryptionContext());
 
         final SecretKey cek = ContentCryptoProvider.generateCEK(
-                updatedHeader.getEncryptionMethod(), getJCAContext().getSecureRandom());
+                header.getEncryptionMethod(), getJCAContext().getSecureRandom());
 
         Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad, getEncryptionContext());
 
-        final EncryptResponse encryptedKey = encryptCEK(getKeyId(), updatedHeader.getAlgorithm(), kmsEncryptionContext, cek);
+        final EncryptResponse encryptedKey = encryptCEK(getKeyId(), header.getAlgorithm(), kmsEncryptionContext, cek);
         final Base64URL encodedEncryptedKey = Base64URL.encode(encryptedKey.ciphertextBlob().asByteArray());
 
-        return ContentCryptoProvider.encrypt(updatedHeader, clearText, aad, cek, encodedEncryptedKey, getJCAContext());
+        return ContentCryptoProvider.encrypt(header, clearText, aad, cek, encodedEncryptedKey, getJCAContext());
     }
 
     private EncryptResponse encryptCEK(String keyId, JWEAlgorithm alg, Map<String, String> encryptionContext, SecretKey cek)

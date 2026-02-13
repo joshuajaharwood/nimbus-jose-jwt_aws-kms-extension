@@ -74,8 +74,6 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
    */
   public static final Set<EncryptionMethod> SUPPORTED_ENCRYPTION_METHODS = ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS;
 
-  public static final String ENCRYPTION_CONTEXT_HEADER = "ec";
-
   protected KmsDefaultEncryptionCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId) {
     super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
     this.kms = kms;

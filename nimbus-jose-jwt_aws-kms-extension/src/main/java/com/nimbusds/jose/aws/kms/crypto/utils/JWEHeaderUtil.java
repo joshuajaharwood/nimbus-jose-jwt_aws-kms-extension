@@ -38,27 +38,4 @@ public final class JWEHeaderUtil {
                     AlgorithmSupportMessage.unsupportedEncryptionMethod(enc, supportedEncryptionMethods));
         }
     }
-
-    /**
-     * Method to add encryption context to a {@link JWEHeader} object,
-     * if the passed {@code encryptionContext} is non-null.
-     * <p>
-     * This method doesn't mutate the passed {@link JWEHeader} object. It rather returns a new {@link JWEHeader} object.
-     */
-    public static JWEHeader getJWEHeaderWithEncryptionContext(
-            @NonNull final JWEHeader header,
-            @NonNull String encryptionContextHeaderName,
-            Map<String, String> encryptionContext) {
-
-        JWEHeader updatedHeader;
-        if (Objects.nonNull(encryptionContext)) {
-            updatedHeader = new JWEHeader.Builder(header)
-                    .customParams(ImmutableMap.of(encryptionContextHeaderName, encryptionContext))
-                    .build();
-        } else {
-            updatedHeader = header; // simply copy ref
-        }
-
-        return updatedHeader;
-    }
 }

@@ -56,6 +56,8 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
      * Encryption context for KMS. Refer KMS's encrypt and decrypt APIs for more details.
      * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Encrypt.html#KMS-Encrypt-request-EncryptionContext">...</a>
      */
+
+    //todo: i think we can remove this and just convert the byte array argument...
     private Map<String, String> encryptionContext;
 
     /**
@@ -85,8 +87,6 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
                         .put(EncryptionMethod.A128GCM, DataKeySpec.AES_128)
                         .put(EncryptionMethod.A128CBC_HS256, DataKeySpec.AES_128)
                         .build();
-
-    public static final String ENCRYPTION_CONTEXT_HEADER = "ec";
 
     protected KmsSymmetricCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId) {
         super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
