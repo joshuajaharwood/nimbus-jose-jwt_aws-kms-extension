@@ -9,7 +9,7 @@ import java.util.Map;
  * and AWS KMS encryption context maps.
  * <p>
  * This allows the newer byte-array based AAD implementation in Nimbus JOSE+JWT
- * to work with AWS KMS's Map<String, String> encryption context.
+ * to work with AWS KMS's keypair encryption context.
  */
 public class AadEncryptionContextAdapter {
 
