@@ -107,10 +107,10 @@ public class KmsLiveIntegrationTest {
                 .keyID(KEY_ID)
                 .build();
         
-        KmsDefaultEncrypter encrypter = new KmsDefaultEncrypter(kmsClient, KEY_ID, userContext);
+        KmsDefaultEncrypter encrypter = new KmsDefaultEncrypter(kmsClient, KEY_ID);
         JWECryptoParts parts = encrypter.encrypt(header, cleartext, aad);
         
-        KmsDefaultDecrypter decrypter = new KmsDefaultDecrypter(kmsClient, KEY_ID, userContext);
+        KmsDefaultDecrypter decrypter = new KmsDefaultDecrypter(kmsClient, KEY_ID);
         byte[] decrypted = decrypter.decrypt(header, parts.getEncryptedKey(), parts.getInitializationVector(), parts.getCipherText(), parts.getAuthenticationTag(), aad);
         
         assertArrayEquals(cleartext, decrypted);
