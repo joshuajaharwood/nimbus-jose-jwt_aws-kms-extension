@@ -10,15 +10,26 @@ import java.util.Map;
  * <p>
  * This allows the newer byte-array based AAD implementation in Nimbus JOSE+JWT
  * to work with AWS KMS's Map<String, String> encryption context.
- * todo: review all
  */
 public class AadEncryptionContextAdapter {
 
   /**
    * Key used to store the AAD in the encryption context.
    * Using a prefixed key to avoid collisions with user-defined context.
+   *
+   * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/encrypt_context.html">AWS KMS Encryption Context</a>
    */
-  private static final String AAD_CONTEXT_KEY = "_jose_aad";
+  public static final String AAD_CONTEXT_KEY = "_jose_aad";
+
+  /**
+   * Maximum length of the base64url-encoded AAD string to ensure it fits within
+   * the KMS encryption context limit.
+   * The limit for the entire encryption context is 1024 bytes (JSON-encoded).
+   * 1000 characters is a safe limit allowing for the key and some user context.
+   * <p>
+   * todo: check that this is definitely correct
+   */
+  public static final int MAX_ENCODED_AAD_LENGTH = 1000;
 
   /**
    * Converts AAD bytes to an encryption context map.
@@ -34,6 +45,11 @@ public class AadEncryptionContextAdapter {
       String encoded = Base64.getUrlEncoder()
                              .withoutPadding()
                              .encodeToString(aad);
+
+      if (encoded.length() > MAX_ENCODED_AAD_LENGTH) {
+        throw new IllegalArgumentException("Encoded AAD length exceeds the maximum supported size for KMS encryption context (" + MAX_ENCODED_AAD_LENGTH + " characters)");
+      }
+
       context.put(AAD_CONTEXT_KEY, encoded);
     }
 
@@ -61,6 +77,11 @@ public class AadEncryptionContextAdapter {
       String encoded = Base64.getUrlEncoder()
                              .withoutPadding()
                              .encodeToString(aad);
+
+      if (encoded.length() > MAX_ENCODED_AAD_LENGTH) {
+        throw new IllegalArgumentException("Encoded AAD length exceeds the maximum supported size for KMS encryption context (" + MAX_ENCODED_AAD_LENGTH + " characters)");
+      }
+
       context.put(AAD_CONTEXT_KEY, encoded);
     }
 
