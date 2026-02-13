@@ -24,14 +24,13 @@ import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsAsymmetricSigningCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.nio.ByteBuffer;
-
+import java.util.Optional;
 
 /**
  * Signer implementation for asymmetric signing with public/private key stored in AWS KMS.
@@ -43,21 +42,28 @@ import java.nio.ByteBuffer;
 public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider implements JWSSigner {
 
     public KmsAsymmetricSigner(
-            @NonNull final KmsClient kms, @NonNull final String privateKeyId, @NonNull final MessageType messageType) {
+            final KmsClient kms, final String privateKeyId, final MessageType messageType) {
         super(kms, privateKeyId, messageType);
     }
 
     @Override
-    public Base64URL sign(@NonNull final JWSHeader header, final byte @NonNull [] signingInput) throws JOSEException {
+    public Base64URL sign(final JWSHeader header, final byte[] signingInput) throws JOSEException {
 
         final ByteBuffer message = getMessage(header, signingInput);
         SignResponse signResponse;
         try {
+            SigningAlgorithmSpec signingAlgorithmSpec =
+                    Optional.ofNullable(JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm()))
+                            .orElseThrow(() -> new JOSEException(
+                                    String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
+                                            header.getAlgorithm(), JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM)
+                            ));
+
             signResponse = getKms().sign(SignRequest.builder()
                     .keyId(getPrivateKeyId())
                     .messageType(getMessageType())
                     .message(SdkBytes.fromByteBuffer(message))
-                    .signingAlgorithm(JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm()).toString())
+                    .signingAlgorithm(signingAlgorithmSpec)
                     .build());
         } catch (NotFoundException | DisabledException | KeyUnavailableException | InvalidKeyUsageException
                  | KmsInvalidStateException e) {

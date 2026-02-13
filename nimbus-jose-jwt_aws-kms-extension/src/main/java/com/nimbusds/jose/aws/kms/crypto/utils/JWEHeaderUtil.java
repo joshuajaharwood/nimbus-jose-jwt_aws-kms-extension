@@ -6,7 +6,6 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.crypto.impl.AlgorithmSupportMessage;
-import org.jspecify.annotations.NonNull;
 
 import java.util.Map;
 import java.util.Objects;
@@ -23,9 +22,9 @@ public final class JWEHeaderUtil {
      * Method to validation the algorithm and encryption-method of the passed JWE header.
      */
     public static void validateJWEHeaderAlgorithms(
-            @NonNull final JWEHeader header,
-            @NonNull Set<JWEAlgorithm> supportedAlgorithms,
-            @NonNull Set<EncryptionMethod> supportedEncryptionMethods) throws JOSEException {
+            final JWEHeader header,
+            Set<JWEAlgorithm> supportedAlgorithms,
+            Set<EncryptionMethod> supportedEncryptionMethods) throws JOSEException {
         final JWEAlgorithm alg = header.getAlgorithm();
         final EncryptionMethod enc = header.getEncryptionMethod();
 

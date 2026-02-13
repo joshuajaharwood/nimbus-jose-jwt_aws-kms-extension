@@ -25,7 +25,6 @@ import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.crypto.impl.BaseJWEProvider;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DataKeySpec;
 import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
@@ -43,13 +42,11 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
     /**
      * AWS-KMS client.
      */
-    @NonNull
     private final KmsClient kms;
 
     /**
      * KMS key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
      */
-    @NonNull
     private final String keyId;
 
     /**
@@ -80,22 +77,20 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
                         .put(EncryptionMethod.A128CBC_HS256, DataKeySpec.AES_128)
                         .build();
 
-    protected KmsSymmetricCryptoProvider(@NonNull final KmsClient kms, @NonNull final String keyId) {
+    protected KmsSymmetricCryptoProvider(final KmsClient kms, final String keyId) {
         super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
         this.kms = kms;
         this.keyId = keyId;
     }
 
-    protected void validateJWEHeader(@NonNull final JWEHeader header) throws JOSEException {
+    protected void validateJWEHeader(final JWEHeader header) throws JOSEException {
         JWEHeaderUtil.validateJWEHeaderAlgorithms(header, SUPPORTED_ALGORITHMS, SUPPORTED_ENCRYPTION_METHODS);
     }
 
-    @NonNull
     protected KmsClient getKms() {
         return this.kms;
     }
 
-    @NonNull
     protected String getKeyId() {
         return this.keyId;
     }

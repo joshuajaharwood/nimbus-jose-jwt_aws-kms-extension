@@ -22,13 +22,13 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsAsymmetricSigningCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -47,14 +47,14 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
 
 
     public KmsAsymmetricVerifier(
-            @NonNull final KmsClient kms, @NonNull final String privateKeyId, @NonNull final MessageType messageType) {
+            final KmsClient kms, final String privateKeyId, final MessageType messageType) {
         super(kms, privateKeyId, messageType);
     }
 
 
     public KmsAsymmetricVerifier(
-            @NonNull final KmsClient kms, @NonNull String privateKeyId, @NonNull final MessageType messageType,
-            @NonNull final Set<String> defCritHeaders) {
+            final KmsClient kms, String privateKeyId, final MessageType messageType,
+            final Set<String> defCritHeaders) {
         super(kms, privateKeyId, messageType);
         critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
     }
@@ -76,7 +76,7 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
 
     @Override
     public boolean verify(
-            @NonNull final JWSHeader header, final byte @NonNull [] signedContent, @NonNull final Base64URL signature)
+            final JWSHeader header, final byte[] signedContent, final Base64URL signature)
             throws JOSEException {
 
         if (!critPolicy.headerPasses(header)) {
@@ -87,9 +87,17 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
 
         VerifyResponse verifyResponse;
         try {
+
+            SigningAlgorithmSpec signingAlgorithmSpec =
+                    Optional.ofNullable(JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm()))
+                            .orElseThrow(() -> new JOSEException(
+                                    String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
+                                            header.getAlgorithm(), JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM)
+                            ));
+
             verifyResponse = getKms().verify(VerifyRequest.builder()
                     .keyId(getPrivateKeyId())
-                    .signingAlgorithm(JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm()).toString())
+                    .signingAlgorithm(signingAlgorithmSpec)
                     .messageType(getMessageType())
                     .message(SdkBytes.fromByteBuffer(message))
                     .signature(SdkBytes.fromByteBuffer(ByteBuffer.wrap(signature.decode())))

@@ -5,7 +5,6 @@ import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.DecryptRequest;
@@ -46,7 +45,7 @@ public final class JWEDecrypterUtil {
             Base64URL iv,
             Base64URL cipherText,
             Base64URL authTag,
-            byte @NonNull [] aad,
+            byte[] aad,
             JWEJCAContext jcaContext)
             throws JOSEException {
 

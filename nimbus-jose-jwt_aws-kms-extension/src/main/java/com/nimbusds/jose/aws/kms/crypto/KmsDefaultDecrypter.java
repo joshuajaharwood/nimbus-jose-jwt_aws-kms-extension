@@ -24,10 +24,8 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -44,14 +42,14 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
      */
     private final CriticalHeaderParamsDeferral critPolicy = new CriticalHeaderParamsDeferral();
 
-    public KmsDefaultDecrypter(@NonNull final KmsClient kms,
-                               @NonNull final String keyId) {
+    public KmsDefaultDecrypter(final KmsClient kms,
+                               final String keyId) {
         super(kms, keyId);
     }
 
-    public KmsDefaultDecrypter(@NonNull final KmsClient kms,
-                               @NonNull final String keyId,
-                               @NonNull final Set<String> defCritHeaders) {
+    public KmsDefaultDecrypter(final KmsClient kms,
+                               final String keyId,
+                               final Set<String> defCritHeaders) {
         this(kms, keyId);
         critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
     }
@@ -71,12 +69,12 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
      */
     @Override
     public byte[] decrypt(
-            @NonNull final JWEHeader header,
-            @NonNull final Base64URL encryptedKey,
-            @NonNull final Base64URL iv,
-            @NonNull final Base64URL cipherText,
-            @NonNull final Base64URL authTag,
-            final byte @NonNull [] aad)
+            final JWEHeader header,
+            final Base64URL encryptedKey,
+            final Base64URL iv,
+            final Base64URL cipherText,
+            final Base64URL authTag,
+            final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);

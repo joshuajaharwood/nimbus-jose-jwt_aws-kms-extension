@@ -22,7 +22,6 @@ import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
 
@@ -39,12 +38,12 @@ import javax.crypto.spec.SecretKeySpec;
 @ThreadSafe
 public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements JWEEncrypter {
 
-    public KmsSymmetricEncrypter(@NonNull final KmsClient kms, @NonNull final String keyId) {
+    public KmsSymmetricEncrypter(final KmsClient kms, final String keyId) {
         super(kms, keyId);
     }
 
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte @NonNull[] aad)
+    public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText, final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);
@@ -61,7 +60,9 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
         return ContentCryptoProvider.encrypt(header, clearText, aad, cek, encryptedKey, getJCAContext());
     }
 
-    private GenerateDataKeyResponse generateDataKey(String keyId, EncryptionMethod encryptionMethod, byte[] aad)
+    private GenerateDataKeyResponse generateDataKey(String keyId,
+                                                    EncryptionMethod encryptionMethod,
+                                                    byte[] aad)
             throws JOSEException {
         try {
             return getKms().generateDataKey(GenerateDataKeyRequest.builder()

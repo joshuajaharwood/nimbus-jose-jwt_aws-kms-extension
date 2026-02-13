@@ -77,29 +77,4 @@ public class AadEncryptionContextAdapter {
               "Failed to decode AAD from encryption context", e);
     }
   }
-
-  /**
-   * Validates that the encryption context contains valid AAD.
-   *
-   * @param encryptionContext The encryption context to validate
-   * @return true if AAD is present and valid
-   */
-  //todo: remove
-  public static boolean hasValidAad(Map<String, String> encryptionContext) {
-    if (encryptionContext == null) {
-      return false;
-    }
-
-    String encoded = encryptionContext.get(AAD_CONTEXT_KEY);
-    if (encoded == null || encoded.isEmpty()) {
-      return false;
-    }
-
-    try {
-      new Base64URL(encoded).decode();
-      return true;
-    } catch (IllegalArgumentException e) {
-      return false;
-    }
-  }
 }

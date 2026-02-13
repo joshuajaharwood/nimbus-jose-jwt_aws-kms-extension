@@ -24,7 +24,6 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -45,12 +44,12 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
      */
     private final CriticalHeaderParamsDeferral critPolicy = new CriticalHeaderParamsDeferral();
 
-    public KmsSymmetricDecrypter(@NonNull final KmsClient kms, @NonNull final String keyId) {
+    public KmsSymmetricDecrypter(final KmsClient kms, final String keyId) {
         super(kms, keyId);
     }
 
-    public KmsSymmetricDecrypter(@NonNull final KmsClient kms, @NonNull final String keyId,
-                                 @NonNull final Set<String> defCritHeaders) {
+    public KmsSymmetricDecrypter(final KmsClient kms, final String keyId,
+                                 final Set<String> defCritHeaders) {
         this(kms, keyId);
         critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
     }
@@ -67,12 +66,12 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
 
     @Override
     public byte[] decrypt(
-            @NonNull final JWEHeader header,
-            @NonNull final Base64URL encryptedKey,
-            @NonNull final Base64URL iv,
-            @NonNull final Base64URL cipherText,
-            @NonNull final Base64URL authTag,
-            final byte @NonNull [] aad)
+            final JWEHeader header,
+            final Base64URL encryptedKey,
+            final Base64URL iv,
+            final Base64URL cipherText,
+            final Base64URL authTag,
+            final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);

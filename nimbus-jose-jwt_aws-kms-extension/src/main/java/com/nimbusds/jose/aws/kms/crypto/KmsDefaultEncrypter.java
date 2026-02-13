@@ -22,7 +22,6 @@ import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
@@ -41,7 +40,7 @@ import java.util.Map;
 @ThreadSafe
 public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider implements JWEEncrypter {
 
-    public KmsDefaultEncrypter(@NonNull final KmsClient kms, @NonNull final String keyId) {
+    public KmsDefaultEncrypter(final KmsClient kms, final String keyId) {
         super(kms, keyId);
     }
 
@@ -49,7 +48,7 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
      * {@inheritDoc}
      */
     @Override
-    public JWECryptoParts encrypt(@NonNull final JWEHeader header, final byte @NonNull [] clearText, final byte @NonNull[] aad)
+    public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText, final byte[] aad)
             throws JOSEException {
 
         validateJWEHeader(header);

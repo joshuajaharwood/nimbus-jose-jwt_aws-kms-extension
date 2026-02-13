@@ -22,7 +22,6 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.impl.BaseJWSProvider;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
-import org.jspecify.annotations.NonNull;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
@@ -43,20 +42,17 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
     /**
      * AWS-KMS client.
      */
-    @NonNull
     private final KmsClient kms;
 
     /**
      * KMS private-key (CMK) ID (it can be a key ID, key ARN, key alias or key alias ARN)
      */
-    @NonNull
     private final String privateKeyId;
 
     /**
      * KMS Message Type. Refer KMS's sign and verify APIs for details.
      * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Sign.html#KMS-Sign-request-MessageType">...</a>
      */
-    @NonNull
     private final MessageType messageType;
 
     public static final Map<JWSAlgorithm, String> JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM =
@@ -135,7 +131,7 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
     public static final Set<JWSAlgorithm> SUPPORTED_ALGORITHMS = JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.keySet();
 
     protected KmsAsymmetricSigningCryptoProvider(
-            @NonNull final KmsClient kms, @NonNull final String privateKeyId, @NonNull final MessageType messageType) {
+            final KmsClient kms, final String privateKeyId, final MessageType messageType) {
         super(SUPPORTED_ALGORITHMS);
         this.kms = kms;
         this.privateKeyId = privateKeyId;
@@ -164,17 +160,14 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
         return ByteBuffer.wrap(message);
     }
 
-    @NonNull
     protected KmsClient getKms() {
         return this.kms;
     }
 
-    @NonNull
     protected String getPrivateKeyId() {
         return this.privateKeyId;
     }
 
-    @NonNull
     protected MessageType getMessageType() {
         return this.messageType;
     }
