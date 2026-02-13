@@ -18,6 +18,7 @@ package com.nimbusds.jose.aws.kms.crypto;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
+import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.AAD;
@@ -70,7 +71,9 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
         final SecretKey cek = ContentCryptoProvider.generateCEK(
                 updatedHeader.getEncryptionMethod(), getJCAContext().getSecureRandom());
 
-        final EncryptResponse encryptedKey = encryptCEK(getKeyId(), updatedHeader.getAlgorithm(), getEncryptionContext(), cek);
+        Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad, getEncryptionContext());
+
+        final EncryptResponse encryptedKey = encryptCEK(getKeyId(), updatedHeader.getAlgorithm(), kmsEncryptionContext, cek);
         final Base64URL encodedEncryptedKey = Base64URL.encode(encryptedKey.ciphertextBlob().asByteArray());
 
         return ContentCryptoProvider.encrypt(updatedHeader, clearText, aad, cek, encodedEncryptedKey, getJCAContext());

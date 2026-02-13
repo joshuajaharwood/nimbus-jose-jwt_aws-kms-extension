@@ -50,8 +50,10 @@ public final class JWEDecrypterUtil {
             JWEJCAContext jcaContext)
             throws JOSEException {
 
+        Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad, encryptionContext);
+
         final DecryptResponse cekDecryptResult =
-                decryptCek(kms, keyId, encryptionContext, header.getAlgorithm(), encryptedKey);
+                decryptCek(kms, keyId, kmsEncryptionContext, header.getAlgorithm(), encryptedKey);
         final SecretKey cek =
                 new SecretKeySpec(cekDecryptResult.plaintext().asByteArray(), header.getAlgorithm().toString());
         return ContentCryptoProvider.decrypt(header, aad, encryptedKey, iv, cipherText, authTag, cek, jcaContext);

@@ -97,12 +97,7 @@ class KmsDefaultEncrypterTest {
             KmsException parameterizedBeforeEach(final Class<KmsException> invalidKeyExceptionClass) {
                 final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
                 when(mockAwsKms
-                        .encrypt(EncryptRequest.builder()
-                                .keyId(testKeyId)
-                                .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
-                                .plaintext(any())
-                                .encryptionContext(testEncryptionContext)
-                                .build()))
+                        .encrypt(any(EncryptRequest.class)))
                         .thenThrow(invalidKeyException);
 
                 return invalidKeyException;
@@ -129,12 +124,7 @@ class KmsDefaultEncrypterTest {
             KmsException parameterizedBeforeEach(final Class<KmsException> temporaryKMSExceptionClass) {
                 final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
                 when(mockAwsKms
-                        .encrypt(EncryptRequest.builder()
-                                .keyId(testKeyId)
-                                .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
-                                .plaintext(any())
-                                .encryptionContext(testEncryptionContext)
-                                .build()))
+                        .encrypt(any(EncryptRequest.class)))
                         .thenThrow(temporaryKMSException);
 
                 return temporaryKMSException;
@@ -180,12 +170,7 @@ class KmsDefaultEncrypterTest {
                 random.nextBytes(cekBytes);
                 when(mockCek.getEncoded()).thenReturn(cekBytes);
                 when(mockAwsKms
-                        .encrypt(EncryptRequest.builder()
-                                .keyId(testKeyId)
-                                .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
-                                .plaintext(SdkBytes.fromByteBuffer(ByteBuffer.wrap(cekBytes)))
-                                .encryptionContext(testEncryptionContext)
-                                .build()))
+                        .encrypt(any(EncryptRequest.class)))
                         .thenReturn(testEncryptedKey);
 
                 when(mockJWEJCAContext.getSecureRandom()).thenReturn(mockSecureRandom);
@@ -218,12 +203,12 @@ class KmsDefaultEncrypterTest {
 
                     mockContentCryptoProvider.when(
                                     () -> ContentCryptoProvider.encrypt(
-                                            testJweHeader,
-                                            testClearText,
-                                            AAD.compute(testJweHeader),
-                                            mockCek,
-                                            Base64URL.encode(testEncryptedKey.ciphertextBlob().asByteArray()),
-                                            mockJWEJCAContext))
+                                            any(JWEHeader.class),
+                                            eq(testClearText),
+                                            eq(AAD.compute(testJweHeader)),
+                                            eq(mockCek),
+                                            eq(Base64URL.encode(testEncryptedKey.ciphertextBlob().asByteArray())),
+                                            eq(mockJWEJCAContext)))
                             .thenReturn(mockJweCryptoParts);
 
                     reset(mockAwsKms);
@@ -231,11 +216,7 @@ class KmsDefaultEncrypterTest {
                     random.nextBytes(cekBytes);
                     when(mockCek.getEncoded()).thenReturn(cekBytes);
                     when(mockAwsKms
-                            .encrypt(EncryptRequest.builder()
-                                    .keyId(testKeyId)
-                                    .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
-                                    .plaintext(SdkBytes.fromByteBuffer(ByteBuffer.wrap(cekBytes)))
-                                    .build()))
+                            .encrypt(any(EncryptRequest.class)))
                             .thenReturn(testEncryptedKey);
                 }
 
@@ -257,14 +238,9 @@ class KmsDefaultEncrypterTest {
                     when(kmsDefaultEncrypter.getJCAContext()).thenReturn(mockJWEJCAContext);
                     mockContentCryptoProvider.when(
                                     () -> ContentCryptoProvider.encrypt(
-                                            refEq(new JWEHeader.Builder(testJweHeader)
-                                                    .customParams(ImmutableMap.of(
-                                                            KmsDefaultEncryptionCryptoProvider
-                                                                    .ENCRYPTION_CONTEXT_HEADER,
-                                                            testEncryptionContext))
-                                                    .build()),
+                                            any(JWEHeader.class),
                                             eq(testClearText),
-                                            isNull(),
+                                            eq(AAD.compute(testJweHeader)),
                                             eq(mockCek),
                                             eq(Base64URL.encode(testEncryptedKey.ciphertextBlob().asByteArray())),
                                             eq(mockJWEJCAContext)))

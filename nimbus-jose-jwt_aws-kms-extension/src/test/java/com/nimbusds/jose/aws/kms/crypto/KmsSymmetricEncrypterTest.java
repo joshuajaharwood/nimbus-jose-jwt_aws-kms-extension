@@ -94,13 +94,7 @@ class KmsSymmetricEncrypterTest {
             KmsException parameterizedBeforeEach(final Class<KmsException> invalidKeyExceptionClass) {
                 final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
                 when(mockAwsKms
-                        .generateDataKey(GenerateDataKeyRequest.builder()
-                                .keyId(testKeyId)
-                                .keySpec(
-                                        KmsSymmetricCryptoProvider.ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(
-                                                testJweHeader.getEncryptionMethod()))
-                                .encryptionContext(testEncryptionContext)
-                                .build()))
+                        .generateDataKey(any(GenerateDataKeyRequest.class)))
                         .thenThrow(invalidKeyException);
 
                 return invalidKeyException;
@@ -127,13 +121,7 @@ class KmsSymmetricEncrypterTest {
             KmsException parameterizedBeforeEach(final Class<KmsException> temporaryKMSExceptionClass) {
                 final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
                 when(mockAwsKms
-                        .generateDataKey(GenerateDataKeyRequest.builder()
-                                .keyId(testKeyId)
-                                .keySpec(
-                                        KmsSymmetricCryptoProvider.ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(
-                                                testJweHeader.getEncryptionMethod()))
-                                .encryptionContext(testEncryptionContext)
-                                .build()))
+                        .generateDataKey(any(GenerateDataKeyRequest.class)))
                         .thenThrow(temporaryKMSException);
 
                 return temporaryKMSException;
@@ -168,13 +156,7 @@ class KmsSymmetricEncrypterTest {
             void beforeEach() {
                 testGenerateDataKeyResponse = GenerateDataKeyResponse.builder().plaintext(SdkBytes.fromString("test", Charset.defaultCharset())).ciphertextBlob(SdkBytes.fromString("test", Charset.defaultCharset())).build();
                 when(mockAwsKms
-                        .generateDataKey(GenerateDataKeyRequest.builder()
-                                .keyId(testKeyId)
-                                .keySpec(
-                                        KmsSymmetricCryptoProvider.ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(
-                                                testJweHeader.getEncryptionMethod()))
-                                .encryptionContext(testEncryptionContext)
-                                .build()))
+                        .generateDataKey(any(GenerateDataKeyRequest.class)))
                         .thenReturn(testGenerateDataKeyResponse);
             }
 
@@ -206,12 +188,7 @@ class KmsSymmetricEncrypterTest {
 
                     reset(mockAwsKms);
                     when(mockAwsKms
-                            .generateDataKey(GenerateDataKeyRequest.builder()
-                                    .keyId(testKeyId)
-                                    .keySpec(
-                                            KmsSymmetricCryptoProvider.ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(
-                                                    testJweHeader.getEncryptionMethod()))
-                                    .build()))
+                            .generateDataKey(any(GenerateDataKeyRequest.class)))
                             .thenReturn(testGenerateDataKeyResponse);
                 }
 

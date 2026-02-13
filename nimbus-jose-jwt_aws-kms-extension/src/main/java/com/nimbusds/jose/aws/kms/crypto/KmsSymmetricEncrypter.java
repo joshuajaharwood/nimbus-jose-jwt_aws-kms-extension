@@ -18,6 +18,7 @@ package com.nimbusds.jose.aws.kms.crypto;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
+import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
@@ -59,7 +60,7 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
         final Base64URL encryptedKey; // The second JWE part
 
         // Generate and encrypt the CEK according to the enc method
-        GenerateDataKeyResponse generateDataKeyResponse = generateDataKey(getKeyId(), header.getEncryptionMethod());
+        GenerateDataKeyResponse generateDataKeyResponse = generateDataKey(getKeyId(), header.getEncryptionMethod(), aad);
         final SecretKey cek = new SecretKeySpec(
                 generateDataKeyResponse.plaintext().asByteArray(), header.getAlgorithm().toString());
 
@@ -70,13 +71,13 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
         return ContentCryptoProvider.encrypt(updatedHeader, clearText, aad, cek, encryptedKey, getJCAContext());
     }
 
-    private GenerateDataKeyResponse generateDataKey(String keyId, EncryptionMethod encryptionMethod)
+    private GenerateDataKeyResponse generateDataKey(String keyId, EncryptionMethod encryptionMethod, byte[] aad)
             throws JOSEException {
         try {
             return getKms().generateDataKey(GenerateDataKeyRequest.builder()
                     .keyId(keyId)
                     .keySpec(ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(encryptionMethod))
-                    .encryptionContext(getEncryptionContext())
+                    .encryptionContext(AadEncryptionContextAdapter.aadToEncryptionContext(aad, getEncryptionContext()))
                     .build());
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException
                  | KmsInvalidStateException e) {
