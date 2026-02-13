@@ -1,8 +1,8 @@
-package com.nimbusds.jose.aws.kms.crypto;
+package com.nimbusds.jose.aws.kms.crypto.aadec;
 
-import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
+import com.nimbusds.jose.aws.kms.crypto.KmsDefaultEncrypter;
+import com.nimbusds.jose.aws.kms.crypto.KmsSymmetricEncrypter;
 import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.util.Base64URL;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,12 +16,10 @@ import software.amazon.awssdk.services.kms.model.GenerateDataKeyRequest;
 import software.amazon.awssdk.services.kms.model.GenerateDataKeyResponse;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -56,7 +54,7 @@ public class AadVerificationTest {
         byte[] expectedAad = AAD.compute(header);
         String expectedEncodedAad = Base64URL.encode(expectedAad).toString();
 
-        assertThat(context).containsExactly(entry(AadEncryptionContextAdapter.AAD_CONTEXT_KEY, expectedEncodedAad));
+        assertThat(context).containsExactly(entry(DefaultAadEncryptionContextConverter.AAD_CONTEXT_KEY, expectedEncodedAad));
     }
 
     @Test
@@ -80,7 +78,7 @@ public class AadVerificationTest {
         Map<String, String> context = captor.getValue().encryptionContext();
         String expectedEncodedAad = Base64URL.encode(customAad).toString();
 
-        assertThat(context).containsExactly(entry(AadEncryptionContextAdapter.AAD_CONTEXT_KEY, expectedEncodedAad));
+        assertThat(context).containsExactly(entry(DefaultAadEncryptionContextConverter.AAD_CONTEXT_KEY, expectedEncodedAad));
     }
 
     @Test
@@ -96,11 +94,6 @@ public class AadVerificationTest {
         JWEHeader header = new JWEHeader.Builder(JWEAlgorithm.parse("SYMMETRIC_DEFAULT"), EncryptionMethod.A256GCM).build();
         byte[] clearText = "hello".getBytes(StandardCharsets.UTF_8);
 
-        // SymmetricEncrypter doesn't seem to have a 2-arg encrypt method in the provided snippet?
-        // Wait, KmsSymmetricEncrypter implements JWEEncrypter.
-        // JWEEncrypter (from Nimbus) has encrypt(JWEHeader, byte[]) and encrypt(JWEHeader, byte[], byte[]).
-        // Let's see KmsSymmetricEncrypter.java.
-        
         encrypter.encrypt(header, clearText, AAD.compute(header));
 
         ArgumentCaptor<GenerateDataKeyRequest> captor = ArgumentCaptor.forClass(GenerateDataKeyRequest.class);
@@ -110,6 +103,6 @@ public class AadVerificationTest {
         byte[] expectedAad = AAD.compute(header);
         String expectedEncodedAad = Base64URL.encode(expectedAad).toString();
 
-        assertEquals(expectedEncodedAad, context.get(AadEncryptionContextAdapter.AAD_CONTEXT_KEY));
+        assertThat(context).containsExactly(entry(DefaultAadEncryptionContextConverter.AAD_CONTEXT_KEY, expectedEncodedAad));
     }
 }

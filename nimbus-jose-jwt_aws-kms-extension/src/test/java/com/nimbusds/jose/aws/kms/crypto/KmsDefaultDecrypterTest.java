@@ -18,6 +18,7 @@ package com.nimbusds.jose.aws.kms.crypto;
 
 import com.google.common.collect.ImmutableSet;
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
@@ -196,7 +197,7 @@ public class KmsDefaultDecrypterTest {
                     try (MockedStatic<JWEDecrypterUtil> utilMockedStatic = mockStatic(JWEDecrypterUtil.class)) {
                         utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
                                                 testJweHeader, testEncryptedKey, testIv, testCipherText,
-                                        testAuthTag, null, mockJWEJCAContext))
+                                        testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
                                 .thenThrow(exceptionClass);
                         assertThrows(exceptionClass, () -> kmsDefaultDecrypter.decrypt(
                                 testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null));
@@ -220,7 +221,7 @@ public class KmsDefaultDecrypterTest {
                             .thenReturn(testDecryptResponse);
                     when(JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
                             testJweHeader, testEncryptedKey, testIv, testCipherText,
-                            testAuthTag, null, mockJWEJCAContext))
+                            testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
                             .thenReturn(expectedData);
                 }
 

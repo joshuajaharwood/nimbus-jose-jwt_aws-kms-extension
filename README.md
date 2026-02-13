@@ -1,7 +1,7 @@
 # nimbus-jose-jwt_aws-kms-extension
 
 This library package is an **extension of [nimbus-jose-jwt](https://connect2id.com/products/nimbus-jose-jwt)** library.
-It is compatible with version >=9.0,<=9.31 of nimbus-jose-jwt. It provides JWE based encrypters/decrypters and JWS based
+It is compatible with version >10.7 of nimbus-jose-jwt. It provides JWE based encrypters/decrypters and JWS based
 signers/verifiers for doing operations with cryptographic keys stores in AWS KMS. This library requires Java 8 or above.
 
 # Usage
@@ -32,11 +32,11 @@ and fetch its plaintext and encrypted versions.
 ## Encryption Example (Java 11)
 
 ```jshelllanguage
-    final var jweEncrypter = new KmsSymmetricEncrypter(AWSKMSClientBuilder.defaultClient(), kid);
+    final KmsSymmetricEncrypter jweEncrypter = new KmsSymmetricEncrypter(AWSKMSClientBuilder.defaultClient(), kid);
 
-    final var jweHeader = new JWEHeader.Builder(alg, enc).keyID(kid).build();
+    final JWEHeader jweHeader = new JWEHeader.Builder(alg, enc).keyID(kid).build();
 
-    final var jweObject = new JWEObject(jweHeader, new Payload(payload));
+    final JWEObject jweObject = new JWEObject(jweHeader, new Payload(payload));
 
     jweObject.encrypt(jweEncrypter);
 ```
@@ -44,17 +44,17 @@ and fetch its plaintext and encrypted versions.
 ## Signing Example (Java 11)
 
 ```jshelllanguage
-    final var jwsSigner = new KmsAsymmetricSigner(
+    final KmsAsymmetricSigner jwsSigner = new KmsAsymmetricSigner(
         AWSKMSClientBuilder.defaultClient(),
         kid,
         MessageType.fromValue(messageType));
 
-    final var jwsHeader = new JWSHeader.Builder(alg)
+    final JWSHeader jwsHeader = new JWSHeader.Builder(alg)
             .keyID(kid)
             .customParam(MESSAGE_TYPE, messageType)
             .build();
 
-    final var jwsObject = new JWSObject(jwsHeader, new Payload(payload));
+    final JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(payload));
 
     jwsObject.sign(jwsSigner);
 ```
@@ -66,11 +66,12 @@ Following are the installation details.
 
 ## Apache Maven
 ```xml
-<dependency>
-    <groupId>software.amazon.lynx</groupId>
-    <artifactId>nimbus-jose-jwt_aws-kms-extension</artifactId>
-    <version>1.0.0</version>
-</dependency>
+<!--todo: cut a release after manual testing-->
+<!--<dependency>-->
+<!--    <groupId>software.amazon.lynx</groupId>-->
+<!--    <artifactId>nimbus-jose-jwt_aws-kms-extension</artifactId>-->
+<!--    <version>1.0.0</version>-->
+<!--</dependency>-->
 ```
 
 ## Gradle Groovy DSL
@@ -80,12 +81,12 @@ repositories {
 }
 
 dependencies {
+//    todo: cut a release after manual testing
     implementation "software.amazon.lynx:nimbus-jose-jwt_aws-kms-extension:1.0.0"
 }
 ```
 
 # Scripts
-
 There are various scripts included in this package, which you can use to perform various encryption/signing operations.
 You can find Gradle tasks and available options of these scripts in `scripts.gradle` file.
 

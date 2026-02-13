@@ -22,6 +22,8 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.crypto.impl.BaseJWEProvider;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
@@ -47,12 +49,18 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
   private final String keyId;
 
   /**
+   * A converter to convert between {@code byte[]} Additional Authenticated Data and {@code Map<String, String>} AWS
+   * KMS encryption contexts.
+   */
+  private final AadEncryptionContextConverter aadEncryptionContextConverter;
+
+  /**
    * The supported JWE algorithms (alg) by the AWS crypto provider class.
    * <p>
    * Note: We accept both the algorithms defined in RFC-7518 and KMS-defined strings.
    *
    * @see <a href="https://datatracker.ietf.org/doc/html/rfc7518#section-4.1">RFC-7518 Section 4.1</a>
-   * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/asymmetric-key-specs.html"> KMS Asymmetric key specs </a>
+   * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/asymmetric-key-specs.html">KMS asymmetric key specs</a>
    */
   public static final Set<JWEAlgorithm> SUPPORTED_ALGORITHMS = ImmutableSet.of(JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.name()), JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_1.name()), JWEAlgorithm.parse(EncryptionAlgorithmSpec.RSAES_OAEP_SHA_256.name()), JWEAlgorithm.A256GCMKW, JWEAlgorithm.RSA_OAEP_256, JWEAlgorithm.RSA_OAEP);
 
@@ -69,6 +77,16 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
     super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
     this.kms = kms;
     this.keyId = keyId;
+    this.aadEncryptionContextConverter = new DefaultAadEncryptionContextConverter();
+  }
+
+  protected KmsDefaultEncryptionCryptoProvider(final KmsClient kms,
+                                               final String keyId,
+                                               final AadEncryptionContextConverter aadEncryptionContextConverter) {
+    super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
+    this.kms = kms;
+    this.keyId = keyId;
+    this.aadEncryptionContextConverter = aadEncryptionContextConverter;
   }
 
   protected void validateJWEHeader(final JWEHeader header) throws JOSEException {
@@ -81,6 +99,10 @@ public abstract class KmsDefaultEncryptionCryptoProvider extends BaseJWEProvider
 
   protected String getKeyId() {
     return this.keyId;
+  }
+
+  protected AadEncryptionContextConverter getAadEncryptionContextConverter() {
+    return this.aadEncryptionContextConverter;
   }
 
 }

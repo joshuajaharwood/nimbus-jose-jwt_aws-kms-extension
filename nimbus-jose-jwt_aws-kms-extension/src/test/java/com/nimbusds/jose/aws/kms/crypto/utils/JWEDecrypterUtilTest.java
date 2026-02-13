@@ -1,6 +1,7 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
@@ -97,7 +98,7 @@ public class JWEDecrypterUtilTest {
         final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
                 () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testJweHeader,
-                        testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext))
+                        testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
                 .isInstanceOf(RemoteKeySourceException.class)
                 .hasMessage("An exception was thrown from KMS due to invalid key.")
                 .hasCause(invalidKeyException);
@@ -131,7 +132,7 @@ public class JWEDecrypterUtilTest {
         final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
                 () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testJweHeader,
-                        testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext))
+                        testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
                 .isInstanceOf(TemporaryJOSEException.class)
                 .hasMessage("A temporary error was thrown from KMS.")
                 .hasCause(invalidKeyException);
@@ -174,7 +175,7 @@ public class JWEDecrypterUtilTest {
       void shouldReturnDecryptedData(final JWEHeader jweHeader) throws JOSEException {
         parameterizedBeforeEach(jweHeader);
         final byte[] actualData = JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
-                jweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext);
+                jweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter());
         assertThat(actualData).isEqualTo(expectedData);
       }
 

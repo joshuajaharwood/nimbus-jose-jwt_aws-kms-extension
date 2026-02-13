@@ -22,6 +22,8 @@ import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEHeaderUtil;
 import com.nimbusds.jose.crypto.impl.BaseJWEProvider;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
@@ -50,10 +52,16 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
     private final String keyId;
 
     /**
+     * A converter to convert between {@code byte[]} Additional Authenticated Data and {@code Map<String, String>} AWS
+     * KMS encryption contexts.
+     */
+    private final AadEncryptionContextConverter aadEncryptionContextConverter;
+
+    /**
      * The supported JWE algorithms (alg) by the AWS crypto provider class.
-     * <p>
-     * Note: We are using KMS prescribed algorithm names here.
-     * Ref: <a href="https://docs.aws.amazon.com/kms/latest/developerguide/symm-asymm-choose.html#key-spec-symmetric-default">...</a>
+     *
+     * @apiNote We are using KMS prescribed algorithm names here.
+     * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/symm-asymm-choose-key-spec.html">Key spec reference</a>
      */
     public static final Set<JWEAlgorithm> SUPPORTED_ALGORITHMS = ImmutableSet.of(
             JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.toString()));
@@ -81,6 +89,16 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
         super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
         this.kms = kms;
         this.keyId = keyId;
+        this.aadEncryptionContextConverter = new DefaultAadEncryptionContextConverter();
+    }
+
+    protected KmsSymmetricCryptoProvider(final KmsClient kms,
+                                         final String keyId,
+                                         final AadEncryptionContextConverter aadEncryptionContextConverter) {
+        super(SUPPORTED_ALGORITHMS, ContentCryptoProvider.SUPPORTED_ENCRYPTION_METHODS);
+        this.kms = kms;
+        this.keyId = keyId;
+        this.aadEncryptionContextConverter = aadEncryptionContextConverter;
     }
 
     protected void validateJWEHeader(final JWEHeader header) throws JOSEException {
@@ -95,4 +113,7 @@ public abstract class KmsSymmetricCryptoProvider extends BaseJWEProvider {
         return this.keyId;
     }
 
+    protected AadEncryptionContextConverter getAadEncryptionContextConverter() {
+        return this.aadEncryptionContextConverter;
+    }
 }

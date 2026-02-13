@@ -1,14 +1,11 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
-import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jose.EncryptionMethod;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEAlgorithm;
 import com.nimbusds.jose.JWEHeader;
 import com.nimbusds.jose.crypto.impl.AlgorithmSupportMessage;
 
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 /**

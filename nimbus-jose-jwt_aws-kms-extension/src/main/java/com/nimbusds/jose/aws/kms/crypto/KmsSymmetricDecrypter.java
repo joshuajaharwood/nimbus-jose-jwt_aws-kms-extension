@@ -20,6 +20,8 @@ import com.nimbusds.jose.CriticalHeaderParamsAware;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
@@ -50,7 +52,15 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
 
     public KmsSymmetricDecrypter(final KmsClient kms, final String keyId,
                                  final Set<String> defCritHeaders) {
-        this(kms, keyId);
+        super(kms, keyId);
+        critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
+    }
+
+    public KmsSymmetricDecrypter(final KmsClient kms,
+                                 final String keyId,
+                                 final Set<String> defCritHeaders,
+                                 final AadEncryptionContextConverter aadEncryptionContextConverter) {
+        super(kms, keyId, aadEncryptionContextConverter);
         critPolicy.setDeferredCriticalHeaderParams(defCritHeaders);
     }
 
@@ -78,6 +88,6 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
         critPolicy.ensureHeaderPasses(header);
 
         return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
-                cipherText, authTag, aad, getJCAContext());
+                cipherText, authTag, aad, getJCAContext(), getAadEncryptionContextConverter());
     }
 }

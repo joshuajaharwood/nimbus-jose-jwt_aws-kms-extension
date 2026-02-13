@@ -17,8 +17,8 @@
 package com.nimbusds.jose.aws.kms.crypto;
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
-import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
@@ -40,8 +40,15 @@ import java.util.Map;
 @ThreadSafe
 public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider implements JWEEncrypter {
 
-    public KmsDefaultEncrypter(final KmsClient kms, final String keyId) {
+    public KmsDefaultEncrypter(final KmsClient kms,
+                               final String keyId) {
         super(kms, keyId);
+    }
+
+    public KmsDefaultEncrypter(final KmsClient kms,
+                               final String keyId,
+                               final AadEncryptionContextConverter aadEncryptionContextConverter) {
+        super(kms, keyId, aadEncryptionContextConverter);
     }
 
     /**
@@ -56,7 +63,7 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
         final SecretKey cek = ContentCryptoProvider.generateCEK(
                 header.getEncryptionMethod(), getJCAContext().getSecureRandom());
 
-        Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad);
+        Map<String, String> kmsEncryptionContext = getAadEncryptionContextConverter().aadToEncryptionContext(aad);
 
         final EncryptResponse encryptedKey = encryptCEK(getKeyId(), header.getAlgorithm(), kmsEncryptionContext, cek);
         final Base64URL encodedEncryptedKey = Base64URL.encode(encryptedKey.ciphertextBlob().asByteArray());

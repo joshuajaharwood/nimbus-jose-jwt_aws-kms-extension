@@ -1,6 +1,7 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
@@ -46,10 +47,11 @@ public final class JWEDecrypterUtil {
             Base64URL cipherText,
             Base64URL authTag,
             byte[] aad,
-            JWEJCAContext jcaContext)
+            JWEJCAContext jcaContext,
+            AadEncryptionContextConverter aadEncryptionContextConverter)
             throws JOSEException {
 
-        Map<String, String> kmsEncryptionContext = AadEncryptionContextAdapter.aadToEncryptionContext(aad);
+        Map<String, String> kmsEncryptionContext = aadEncryptionContextConverter.aadToEncryptionContext(aad);
 
         final DecryptResponse cekDecryptResult =
                 decryptCek(kms, keyId, kmsEncryptionContext, header.getAlgorithm(), encryptedKey);

@@ -50,8 +50,8 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
     private final String privateKeyId;
 
     /**
-     * KMS Message Type. Refer KMS's sign and verify APIs for details.
-     * Ref: <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Sign.html#KMS-Sign-request-MessageType">...</a>
+     * KMS Message Type. Refer to KMS's sign and verify APIs for details.
+     * @see <a href="https://docs.aws.amazon.com/kms/latest/APIReference/API_Sign.html#KMS-Sign-request-MessageType">MessageType</a>
      */
     private final MessageType messageType;
 

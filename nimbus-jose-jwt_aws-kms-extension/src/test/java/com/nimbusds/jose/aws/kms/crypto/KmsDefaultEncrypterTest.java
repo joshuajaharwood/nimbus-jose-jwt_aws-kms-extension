@@ -60,7 +60,6 @@ class KmsDefaultEncrypterTest {
     @Mock
     private KmsClient mockAwsKms;
     private final String testKeyId = random.nextObject(String.class);
-    private final Map<String, String> testEncryptionContext = random.nextObject(Map.class);
 
     private KmsDefaultEncrypter kmsDefaultEncrypter;
 

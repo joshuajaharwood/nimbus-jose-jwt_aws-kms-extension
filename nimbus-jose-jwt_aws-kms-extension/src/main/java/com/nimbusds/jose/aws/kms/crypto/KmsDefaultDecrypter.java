@@ -20,6 +20,7 @@ import com.nimbusds.jose.CriticalHeaderParamsAware;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWEDecrypter;
 import com.nimbusds.jose.JWEHeader;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
@@ -81,6 +82,6 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
         critPolicy.ensureHeaderPasses(header);
 
         return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
-                cipherText, authTag, aad, getJCAContext());
+                cipherText, authTag, aad, getJCAContext(), getAadEncryptionContextConverter());
     }
 }

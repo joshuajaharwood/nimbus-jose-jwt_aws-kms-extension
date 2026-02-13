@@ -1,4 +1,4 @@
-package com.nimbusds.jose.aws.kms.crypto;
+package com.nimbusds.jose.aws.kms.crypto.aadec;
 
 import com.google.common.collect.ImmutableMap;
 

@@ -17,8 +17,9 @@
 package com.nimbusds.jose.aws.kms.crypto;
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
-import com.nimbusds.jose.aws.kms.crypto.utils.AadEncryptionContextAdapter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
@@ -37,10 +38,16 @@ import javax.crypto.spec.SecretKeySpec;
  */
 @ThreadSafe
 public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements JWEEncrypter {
-
     public KmsSymmetricEncrypter(final KmsClient kms, final String keyId) {
         super(kms, keyId);
     }
+
+    public KmsSymmetricEncrypter(final KmsClient kms,
+                                 final String keyId,
+                                 final AadEncryptionContextConverter aadEncryptionContextConverter) {
+        super(kms, keyId, aadEncryptionContextConverter);
+    }
+
 
     @Override
     public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText, final byte[] aad)
@@ -68,7 +75,7 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
             return getKms().generateDataKey(GenerateDataKeyRequest.builder()
                     .keyId(keyId)
                     .keySpec(ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(encryptionMethod))
-                    .encryptionContext(AadEncryptionContextAdapter.aadToEncryptionContext(aad))
+                    .encryptionContext(getAadEncryptionContextConverter().aadToEncryptionContext(aad))
                     .build());
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException
                  | KmsInvalidStateException e) {

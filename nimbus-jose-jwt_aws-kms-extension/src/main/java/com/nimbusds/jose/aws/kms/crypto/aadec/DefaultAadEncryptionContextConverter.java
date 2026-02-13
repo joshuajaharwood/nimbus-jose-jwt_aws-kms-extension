@@ -1,10 +1,8 @@
-package com.nimbusds.jose.aws.kms.crypto;
+package com.nimbusds.jose.aws.kms.crypto.aadec;
 
 import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jose.util.Base64URL;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 public class DefaultAadEncryptionContextConverter implements AadEncryptionContextConverter {

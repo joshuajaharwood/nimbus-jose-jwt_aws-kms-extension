@@ -24,11 +24,11 @@ import org.jspecify.annotations.NonNull;
  */
 public class TemporaryJOSEException extends JOSEException {
 
-    public TemporaryJOSEException(@NonNull final String message) {
+    public TemporaryJOSEException(final String message) {
         super(message);
     }
 
-    public TemporaryJOSEException(@NonNull final String message, @NonNull final Throwable cause) {
+    public TemporaryJOSEException(final String message, final Throwable cause) {
         super(message, cause);
     }
 }
