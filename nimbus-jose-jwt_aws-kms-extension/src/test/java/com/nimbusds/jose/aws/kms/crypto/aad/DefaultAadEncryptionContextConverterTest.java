@@ -1,4 +1,4 @@
-package com.nimbusds.jose.aws.kms.crypto.aadec;
+package com.nimbusds.jose.aws.kms.crypto.aad;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.KmsDefaultEncrypter;

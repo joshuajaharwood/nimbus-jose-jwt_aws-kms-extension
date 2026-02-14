@@ -1,7 +1,7 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aad.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;

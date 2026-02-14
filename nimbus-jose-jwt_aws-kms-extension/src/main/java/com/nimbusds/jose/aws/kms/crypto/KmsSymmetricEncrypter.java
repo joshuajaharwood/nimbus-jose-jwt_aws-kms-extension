@@ -17,8 +17,7 @@
 package com.nimbusds.jose.aws.kms.crypto;
 
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.aws.kms.crypto.aadec.AadEncryptionContextConverter;
-import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aad.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;

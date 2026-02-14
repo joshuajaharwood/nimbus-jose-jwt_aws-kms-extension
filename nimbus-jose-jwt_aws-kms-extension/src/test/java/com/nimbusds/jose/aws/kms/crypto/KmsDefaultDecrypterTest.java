@@ -18,7 +18,7 @@ package com.nimbusds.jose.aws.kms.crypto;
 
 import com.google.common.collect.ImmutableSet;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.aws.kms.crypto.aadec.DefaultAadEncryptionContextConverter;
+import com.nimbusds.jose.aws.kms.crypto.aad.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
