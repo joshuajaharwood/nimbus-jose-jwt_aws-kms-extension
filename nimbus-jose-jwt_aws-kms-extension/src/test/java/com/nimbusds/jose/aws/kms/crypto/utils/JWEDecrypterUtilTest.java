@@ -28,7 +28,6 @@ import software.amazon.awssdk.services.kms.model.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider.JWE_TO_KMS_ALGORITHM_SPEC;

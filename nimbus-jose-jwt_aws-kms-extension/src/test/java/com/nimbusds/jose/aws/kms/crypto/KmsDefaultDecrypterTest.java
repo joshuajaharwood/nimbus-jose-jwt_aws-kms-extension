@@ -46,12 +46,10 @@ import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.Set;
 
 import static com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider.JWE_TO_KMS_ALGORITHM_SPEC;
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @DisplayName("For KmsDefaultDecrypter class, ")
@@ -114,10 +112,10 @@ public class KmsDefaultDecrypterTest {
     class DecryptMethod {
 
         private JWEHeader testJweHeader;
-        private Base64URL testEncryptedKey = random.nextObject(Base64URL.class);
-        private Base64URL testIv = random.nextObject(Base64URL.class);
-        private Base64URL testCipherText = random.nextObject(Base64URL.class);
-        private Base64URL testAuthTag = random.nextObject(Base64URL.class);
+        private final Base64URL testEncryptedKey = random.nextObject(Base64URL.class);
+        private final Base64URL testIv = random.nextObject(Base64URL.class);
+        private final Base64URL testCipherText = random.nextObject(Base64URL.class);
+        private final Base64URL testAuthTag = random.nextObject(Base64URL.class);
 
         @BeforeEach
         void beforeEach() {
@@ -159,8 +157,6 @@ public class KmsDefaultDecrypterTest {
 
             @Mock
             private JWEJCAContext mockJWEJCAContext;
-            @Mock
-            JWEDecrypterUtil jweDecrypterUtil;
             private final DecryptResponse testDecryptResponse = DecryptResponse.builder().plaintext(SdkBytes.fromString("test", Charset.defaultCharset())).build();
             private final MockedStatic<ContentCryptoProvider> mockContentCryptoProvider =
                     mockStatic(ContentCryptoProvider.class);

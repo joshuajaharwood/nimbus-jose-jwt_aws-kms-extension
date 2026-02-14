@@ -16,9 +16,7 @@
 
 package com.nimbusds.jose.aws.kms.crypto;
 
-import com.google.common.collect.ImmutableMap;
 import com.nimbusds.jose.*;
-import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.AAD;
@@ -40,12 +38,10 @@ import software.amazon.awssdk.services.kms.model.*;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.Charset;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.*;
 
 @DisplayName("For KmsSymmetricEncrypter class,")

@@ -46,11 +46,9 @@ import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @DisplayName("For KmsSymmetricDecrypter class, ")
@@ -147,7 +145,7 @@ class KmsSymmetricDecrypterTest {
             void shouldThrowJOSEException() {
                 assertThatThrownBy(
                         () -> kmsSymmetricDecrypter.decrypt(testJweHeader, testEncryptedKey, testIv, testCipherText,
-                                testAuthTag, null))
+                                testAuthTag, AAD.compute(testJweHeader)))
                         .isInstanceOf(JOSEException.class)
                         .hasNoCause();
             }
@@ -159,8 +157,6 @@ class KmsSymmetricDecrypterTest {
 
             @Mock
             private JWEJCAContext mockJWEJCAContext;
-            @Mock
-            JWEDecrypterUtil jweDecrypterUtil;
             private final DecryptResponse testDecryptResponse = DecryptResponse.builder().plaintext(SdkBytes.fromString("test", Charset.defaultCharset())).build();
             private final MockedStatic<ContentCryptoProvider> mockContentCryptoProvider =
                     mockStatic(ContentCryptoProvider.class);

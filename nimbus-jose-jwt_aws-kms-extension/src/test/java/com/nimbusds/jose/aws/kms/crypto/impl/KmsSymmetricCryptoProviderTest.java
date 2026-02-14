@@ -26,8 +26,6 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.kms.KmsClient;
 
-import java.util.Map;
-
 import static org.mockito.Mockito.*;
 
 @DisplayName("For KmsSymmetricCryptoProvider class,")
