@@ -18,10 +18,12 @@ package com.nimbusds.jose.aws.kms.crypto;
 
 import com.google.common.collect.ImmutableSet;
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aad.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.aad.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
+import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.jca.JWEJCAContext;
@@ -48,8 +50,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider.JWE_TO_KMS_ALGORITHM_SPEC;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -62,15 +63,15 @@ public class KmsDefaultDecrypterTest {
     @Mock
     private KmsClient mockAwsKms;
     private String testKeyId;
-    private Map<String, String> testEncryptionContext;
     private Set<String> testDeferredCriticalHeaders;
     private KmsDefaultDecrypter kmsDefaultDecrypter;
+    private AadEncryptionContextConverter aadEncryptionContextConverter;
 
     @BeforeEach
     void setUp() {
         testKeyId = random.nextObject(String.class);
-        testEncryptionContext = random.nextObject(Map.class);
         testDeferredCriticalHeaders = ImmutableSet.of("test-deferred-critical-header");
+        aadEncryptionContextConverter = new DefaultAadEncryptionContextConverter();
     }
 
     @Nested
@@ -146,7 +147,7 @@ public class KmsDefaultDecrypterTest {
             void shouldThrowJOSEException() {
                 assertThatThrownBy(
                         () -> kmsDefaultDecrypter.decrypt(testJweHeader, testEncryptedKey, testIv, testCipherText,
-                                testAuthTag, null))
+                                testAuthTag, AAD.compute(testJweHeader)))
                         .isInstanceOf(JOSEException.class)
                         .hasNoCause();
             }
@@ -175,7 +176,7 @@ public class KmsDefaultDecrypterTest {
                 random.nextBytes(expectedData);
                 mockContentCryptoProvider.when(
                                 () -> ContentCryptoProvider.decrypt(
-                                        testJweHeader, null, testEncryptedKey, testIv, testCipherText, testAuthTag,
+                                        testJweHeader, AAD.compute(testJweHeader), testEncryptedKey, testIv, testCipherText, testAuthTag,
                                         new SecretKeySpec(
                                                 testDecryptResponse.plaintext().asByteArray(),
                                                 testJweHeader.getAlgorithm().toString()),
@@ -194,13 +195,22 @@ public class KmsDefaultDecrypterTest {
                         JOSEException.class, RemoteKeySourceException.class, TemporaryJOSEException.class
                 })
                 void shouldThrowException(final Class<Throwable> exceptionClass) {
+                    byte[] aad = AAD.compute(testJweHeader);
+
                     try (MockedStatic<JWEDecrypterUtil> utilMockedStatic = mockStatic(JWEDecrypterUtil.class)) {
-                        utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
-                                                testJweHeader, testEncryptedKey, testIv, testCipherText,
-                                        testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
-                                .thenThrow(exceptionClass);
-                        assertThrows(exceptionClass, () -> kmsDefaultDecrypter.decrypt(
-                                testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null));
+                        utilMockedStatic.when(() -> JWEDecrypterUtil.decrypt(
+                                eq(mockAwsKms),
+                                eq(testKeyId),
+                                eq(testJweHeader),
+                                eq(testEncryptedKey),
+                                eq(testIv),
+                                eq(testCipherText),
+                                eq(testAuthTag),
+                                eq(aad),
+                                eq(mockJWEJCAContext),
+                                any(AadEncryptionContextConverter.class)))                                .thenThrow(exceptionClass);
+                        assertThatExceptionOfType(exceptionClass).isThrownBy(() -> kmsDefaultDecrypter.decrypt(
+                                testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, aad));
                     }
                 }
             }
@@ -213,7 +223,7 @@ public class KmsDefaultDecrypterTest {
                 void beforeEach() throws JOSEException {
                     when(mockAwsKms
                             .decrypt(DecryptRequest.builder()
-                                    .encryptionContext(testEncryptionContext)
+                                    .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                     .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                     .keyId(testKeyId)
                                     .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
@@ -221,7 +231,7 @@ public class KmsDefaultDecrypterTest {
                             .thenReturn(testDecryptResponse);
                     when(JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
                             testJweHeader, testEncryptedKey, testIv, testCipherText,
-                            testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
+                            testAuthTag, AAD.compute(testJweHeader), mockJWEJCAContext, aadEncryptionContextConverter))
                             .thenReturn(expectedData);
                 }
 
@@ -229,7 +239,7 @@ public class KmsDefaultDecrypterTest {
                 @DisplayName("should return decrypted data.")
                 void shouldReturnDecryptedData() throws JOSEException {
                     final byte[] actualData = kmsDefaultDecrypter.decrypt(
-                            testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null);
+                            testJweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, AAD.compute(testJweHeader));
                     assertThat(actualData).isEqualTo(expectedData);
                 }
             }

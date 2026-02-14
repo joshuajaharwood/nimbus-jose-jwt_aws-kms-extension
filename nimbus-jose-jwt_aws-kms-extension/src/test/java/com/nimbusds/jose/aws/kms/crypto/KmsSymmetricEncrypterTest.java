@@ -106,7 +106,7 @@ class KmsSymmetricEncrypterTest {
                     KeyUnavailableException.class, KmsInvalidStateException.class})
             void shouldThrowRemoteKeySourceException(final Class<KmsException> invalidKeyExceptionClass) {
                 final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
-                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null))
+                assertThatThrownBy(() -> kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader)))
                         .isInstanceOf(RemoteKeySourceException.class)
                         .hasMessage("An exception was thrown from KMS due to invalid key.")
                         .hasCause(invalidKeyException);
@@ -178,7 +178,7 @@ class KmsSymmetricEncrypterTest {
                                     () -> ContentCryptoProvider.encrypt(
                                             testJweHeader,
                                             testClearText,
-                                            null,
+                                            AAD.compute(testJweHeader),
                                             new SecretKeySpec(testGenerateDataKeyResponse.plaintext().asByteArray(),
                                                     testJweHeader.getAlgorithm().toString()),
                                             Base64URL.encode(testGenerateDataKeyResponse.ciphertextBlob().asByteArray()),
@@ -195,7 +195,7 @@ class KmsSymmetricEncrypterTest {
                 @DisplayName("should encrypt JWE token.")
                 void shouldReturnEncryptedJWEToken() throws JOSEException {
                     final JWECryptoParts actualJweCryptoParts =
-                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null);
+                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader));
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
                 }
 
@@ -212,7 +212,7 @@ class KmsSymmetricEncrypterTest {
                                     () -> ContentCryptoProvider.encrypt(
                                             eq(testJweHeader),
                                             eq(testClearText),
-                                            isNull(),
+                                            eq(AAD.compute(testJweHeader)),
                                             eq(new SecretKeySpec(
                                                     testGenerateDataKeyResponse.plaintext().asByteArray(),
                                                     testJweHeader.getAlgorithm().toString())),
@@ -226,7 +226,7 @@ class KmsSymmetricEncrypterTest {
                 @DisplayName("should encrypt JWE token.")
                 void shouldReturnEncryptedJWEToken() throws JOSEException {
                     final JWECryptoParts actualJweCryptoParts =
-                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, null);
+                            kmsSymmetricEncrypter.encrypt(testJweHeader, testClearText, AAD.compute(testJweHeader));
                     assertThat(actualJweCryptoParts).isSameAs(mockJweCryptoParts);
                 }
 

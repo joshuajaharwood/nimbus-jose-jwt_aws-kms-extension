@@ -90,7 +90,7 @@ class KmsSymmetricCryptoProviderTest {
             @BeforeEach
             void beforeEach() {
                 kmsSymmetricCryptoProvider = mock(KmsSymmetricCryptoProvider.class, withSettings()
-                        .useConstructor(mockAwsKms, testPrivateKeyId, mock(Map.class))
+                        .useConstructor(mockAwsKms, testPrivateKeyId)
                         .defaultAnswer(CALLS_REAL_METHODS));
             }
 

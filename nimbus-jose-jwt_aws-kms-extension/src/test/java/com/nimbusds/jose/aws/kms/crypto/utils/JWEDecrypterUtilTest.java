@@ -1,9 +1,11 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
 import com.nimbusds.jose.*;
+import com.nimbusds.jose.aws.kms.crypto.aad.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.aad.DefaultAadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.crypto.testUtils.EasyRandomTestUtils;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
+import com.nimbusds.jose.crypto.impl.AAD;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
 import com.nimbusds.jose.util.Base64URL;
@@ -54,21 +56,21 @@ public class JWEDecrypterUtilTest {
     private JWEJCAContext mockJWEJCAContext;
     @Mock
     private KmsClient mockAwsKms;
-    private Map<String, String> testEncryptionContext;
     private JWEHeader testJweHeader;
     private final Base64URL testEncryptedKey = random.nextObject(Base64URL.class);
     private final Base64URL testIv = random.nextObject(Base64URL.class);
     private final Base64URL testCipherText = random.nextObject(Base64URL.class);
     private final Base64URL testAuthTag = random.nextObject(Base64URL.class);
+    private AadEncryptionContextConverter aadEncryptionContextConverter = new DefaultAadEncryptionContextConverter();
 
     @BeforeEach
     void setUp() {
       testKeyId = random.nextObject(String.class);
-      testEncryptionContext = random.nextObject(Map.class);
       testJweHeader = new JWEHeader.Builder(
               JWEAlgorithm.RSA_OAEP_256,
               EncryptionMethod.A256GCM)
               .build();
+      aadEncryptionContextConverter = new DefaultAadEncryptionContextConverter();
     }
 
     @Nested
@@ -79,7 +81,7 @@ public class JWEDecrypterUtilTest {
         final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
-                                       .encryptionContext(testEncryptionContext)
+                                       .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                        .keyId(testKeyId)
                                        .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                        .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
@@ -98,7 +100,7 @@ public class JWEDecrypterUtilTest {
         final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
                 () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testJweHeader,
-                        testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
+                        testEncryptedKey, testIv, testCipherText, testAuthTag, AAD.compute(testJweHeader), mockJWEJCAContext, aadEncryptionContextConverter))
                 .isInstanceOf(RemoteKeySourceException.class)
                 .hasMessage("An exception was thrown from KMS due to invalid key.")
                 .hasCause(invalidKeyException);
@@ -113,7 +115,7 @@ public class JWEDecrypterUtilTest {
         final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
-                                       .encryptionContext(testEncryptionContext)
+                                       .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                        .keyId(testKeyId)
                                        .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                        .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
@@ -132,7 +134,7 @@ public class JWEDecrypterUtilTest {
         final KmsException invalidKeyException = parameterizedBeforeEach(invalidKeyExceptionClass);
         assertThatThrownBy(
                 () -> JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId, testJweHeader,
-                        testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter()))
+                        testEncryptedKey, testIv, testCipherText, testAuthTag, AAD.compute(testJweHeader), mockJWEJCAContext, aadEncryptionContextConverter))
                 .isInstanceOf(TemporaryJOSEException.class)
                 .hasMessage("A temporary error was thrown from KMS.")
                 .hasCause(invalidKeyException);
@@ -151,7 +153,7 @@ public class JWEDecrypterUtilTest {
       void parameterizedBeforeEach(final JWEHeader jweHeader) {
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
-                                       .encryptionContext(testEncryptionContext)
+                                       .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                        .keyId(testKeyId)
                                        .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(jweHeader.getAlgorithm()))
                                        .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
@@ -161,7 +163,7 @@ public class JWEDecrypterUtilTest {
         random.nextBytes(expectedData);
         mockContentCryptoProvider.when(
                                          () -> ContentCryptoProvider.decrypt(
-                                                 jweHeader, null, testEncryptedKey, testIv, testCipherText, testAuthTag,
+                                                 jweHeader, AAD.compute(testJweHeader), testEncryptedKey, testIv, testCipherText, testAuthTag,
                                                  new SecretKeySpec(
                                                          testDecryptResult.plaintext().asByteArray(),
                                                          jweHeader.getAlgorithm().toString()),
@@ -175,7 +177,7 @@ public class JWEDecrypterUtilTest {
       void shouldReturnDecryptedData(final JWEHeader jweHeader) throws JOSEException {
         parameterizedBeforeEach(jweHeader);
         final byte[] actualData = JWEDecrypterUtil.decrypt(mockAwsKms, testKeyId,
-                jweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, null, mockJWEJCAContext, new DefaultAadEncryptionContextConverter());
+                jweHeader, testEncryptedKey, testIv, testCipherText, testAuthTag, AAD.compute(testJweHeader), mockJWEJCAContext, aadEncryptionContextConverter);
         assertThat(actualData).isEqualTo(expectedData);
       }
 
