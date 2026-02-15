@@ -33,8 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @DisplayName("For KmsAsymmetricSigningCryptoProvider class,")
@@ -87,9 +86,9 @@ public class KmsAsymmetricSigningCryptoProviderTest {
             @Test
             @DisplayName("should throw JOSEException.")
             void shouldThrowException() {
-                assertThatThrownBy(() -> kmsAsymmetricSigningCryptoProvider.getMessage(testJwsHeader, testSigningInputBytes))
-                        .isInstanceOf(JOSEException.class)
-                        .hasMessage(String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
+                assertThatExceptionOfType(JOSEException.class)
+                        .isThrownBy(() -> kmsAsymmetricSigningCryptoProvider.getMessage(testJwsHeader, testSigningInputBytes))
+                        .withMessage(String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
                                 testJwsHeader.getAlgorithm(),
                                 KmsAsymmetricSigningCryptoProvider.JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM));
             }
