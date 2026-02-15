@@ -52,12 +52,8 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
         final ByteBuffer message = getMessage(header, signingInput);
         SignResponse signResponse;
         try {
-            SigningAlgorithmSpec signingAlgorithmSpec =
-                    Optional.ofNullable(JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm()))
-                            .orElseThrow(() -> new JOSEException(
-                                    String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
-                                            header.getAlgorithm(), JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM)
-                            ));
+            // We've already checked if the given algorithm is mapped in KmsAsymmetricSigningCryptoProvider
+            SigningAlgorithmSpec signingAlgorithmSpec = JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm());
 
             signResponse = getKms().sign(SignRequest.builder()
                     .keyId(getPrivateKeyId())
