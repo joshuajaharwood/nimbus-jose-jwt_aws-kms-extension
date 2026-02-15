@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.kms.model.GenerateDataKeyRequest;
 import software.amazon.awssdk.services.kms.model.GenerateDataKeyResponse;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
@@ -154,6 +155,17 @@ public class DefaultAadEncryptionContextConverterTest {
             // 750 bytes results in 1000 characters.
             assertThatIllegalArgumentException()
                     .isThrownBy(() -> defaultAadEncryptionContextConverter.aadToEncryptionContext(new byte[751]));
+        }
+
+        @Test
+        void passingEmptyByteArrayReturnsEmptyMap() {
+            assertThat(defaultAadEncryptionContextConverter.aadToEncryptionContext(new byte[0])).isUnmodifiable()
+                                                                                                .isEmpty();
+        }
+
+        @Test
+        void passingEmptyMapReturnsEmptyByteArray() {
+            assertThat(defaultAadEncryptionContextConverter.encryptionContextToAad(Collections.emptyMap())).isEmpty();
         }
     }
 }
