@@ -87,13 +87,8 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
 
         VerifyResponse verifyResponse;
         try {
-
-            SigningAlgorithmSpec signingAlgorithmSpec =
-                    Optional.ofNullable(JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm()))
-                            .orElseThrow(() -> new JOSEException(
-                                    String.format("No digest algorithm exist for the JWS algorithm %s in map: %s",
-                                            header.getAlgorithm(), JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM)
-                            ));
+            // We've already checked if the given algorithm is mapped in KmsAsymmetricSigningCryptoProvider
+            SigningAlgorithmSpec signingAlgorithmSpec = JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm());
 
             verifyResponse = getKms().verify(VerifyRequest.builder()
                     .keyId(getPrivateKeyId())
