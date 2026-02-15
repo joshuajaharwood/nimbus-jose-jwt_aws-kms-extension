@@ -50,8 +50,13 @@ dependencies {
     implementation 'com.google.guava:guava:33.5.0-jre'
 
     implementation platform('org.junit:junit-bom:5.14.2')
+    implementation platform('org.slf4j:slf4j-bom:2.0.17')
+
+    implementation 'org.slf4j:slf4j-api'
+
 
     // Use JUnit Jupiter for testing.
+    testImplementation 'org.slf4j:slf4j-simple'
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 

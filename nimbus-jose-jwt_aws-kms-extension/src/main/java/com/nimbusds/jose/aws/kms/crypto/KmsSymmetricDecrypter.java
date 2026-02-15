@@ -25,6 +25,8 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import javax.annotation.concurrent.ThreadSafe;
@@ -39,6 +41,7 @@ import java.util.Set;
 @ThreadSafe
 public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements JWEDecrypter,
         CriticalHeaderParamsAware {
+    private static final Logger LOG = LoggerFactory.getLogger(KmsSymmetricDecrypter.class);
 
     /**
      * The critical header policy.
@@ -82,11 +85,17 @@ public class KmsSymmetricDecrypter extends KmsSymmetricCryptoProvider implements
             final Base64URL authTag,
             final byte[] aad)
             throws JOSEException {
+        //todo: ?
+        LOG.info("Decrypting JWE...");
 
         validateJWEHeader(header);
         critPolicy.ensureHeaderPasses(header);
 
-        return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
+        final byte[] decryptionResult = JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
                 cipherText, authTag, aad, getJCAContext(), getAadEncryptionContextConverter());
+
+        LOG.info("JWE decryption complete.");
+
+        return decryptionResult;
     }
 }

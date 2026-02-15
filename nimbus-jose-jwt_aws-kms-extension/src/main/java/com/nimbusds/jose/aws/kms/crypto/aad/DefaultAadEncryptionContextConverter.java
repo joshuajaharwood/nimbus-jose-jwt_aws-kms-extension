@@ -12,7 +12,7 @@ public class DefaultAadEncryptionContextConverter implements AadEncryptionContex
      *
      * @see <a href="https://docs.aws.amazon.com/kms/latest/developerguide/encrypt_context.html">AWS KMS Encryption Context</a>
      */
-    public static final String AAD_CONTEXT_KEY = "_jose_aad";
+    public static final String AAD_CONTEXT_KEY = "_jose_kms_aad";
 
     /**
      * Maximum length of the base64url-encoded AAD string to ensure it fits within

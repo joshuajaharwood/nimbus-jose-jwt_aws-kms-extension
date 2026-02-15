@@ -24,6 +24,8 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider;
 import com.nimbusds.jose.aws.kms.crypto.utils.JWEDecrypterUtil;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.kms.KmsClient;
 
 import java.util.Set;
@@ -36,6 +38,7 @@ import java.util.Set;
  */
 public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider implements JWEDecrypter,
         CriticalHeaderParamsAware {
+    private static final Logger LOG = LoggerFactory.getLogger(KmsDefaultDecrypter.class);
 
     /**
      * The critical header policy.
@@ -77,10 +80,16 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
             final byte[] aad)
             throws JOSEException {
 
+        LOG.info("Decrypting JWE using GenerateDataKey API to decrypt CEK...");
+
         validateJWEHeader(header);
         critPolicy.ensureHeaderPasses(header);
 
-        return JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
+        byte[] decryptionResult = JWEDecrypterUtil.decrypt(getKms(), getKeyId(), header, encryptedKey, iv,
                 cipherText, authTag, aad, getJCAContext(), getAadEncryptionContextConverter());
+
+        LOG.info("JWE decryption complete.");
+
+        return decryptionResult;
     }
 }

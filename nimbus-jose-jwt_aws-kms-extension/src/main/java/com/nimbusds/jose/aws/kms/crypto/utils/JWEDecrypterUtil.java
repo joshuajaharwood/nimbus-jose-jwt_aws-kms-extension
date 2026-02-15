@@ -1,34 +1,36 @@
 package com.nimbusds.jose.aws.kms.crypto.utils;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.aws.kms.crypto.aad.AadEncryptionContextConverter;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.jca.JWEJCAContext;
+import com.nimbusds.jose.util.ArrayUtils;
 import com.nimbusds.jose.util.Base64URL;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
-import software.amazon.awssdk.services.kms.model.DecryptRequest;
-import software.amazon.awssdk.services.kms.model.DecryptResponse;
-import software.amazon.awssdk.services.kms.model.DependencyTimeoutException;
-import software.amazon.awssdk.services.kms.model.DisabledException;
-import software.amazon.awssdk.services.kms.model.InvalidGrantTokenException;
-import software.amazon.awssdk.services.kms.model.InvalidKeyUsageException;
-import software.amazon.awssdk.services.kms.model.KeyUnavailableException;
-import software.amazon.awssdk.services.kms.model.KmsInternalException;
-import software.amazon.awssdk.services.kms.model.KmsInvalidStateException;
-import software.amazon.awssdk.services.kms.model.NotFoundException;
+import software.amazon.awssdk.services.kms.model.*;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Map;
 
+import static com.nimbusds.jose.JWEAlgorithm.Family.SYMMETRIC;
 import static com.nimbusds.jose.aws.kms.crypto.impl.KmsDefaultEncryptionCryptoProvider.JWE_TO_KMS_ALGORITHM_SPEC;
 
 /**
  * Utility class containing JWE decryption-related methods.
  */
 public final class JWEDecrypterUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(JWEDecrypterUtil.class);
+    private static final JWEAlgorithm SYMMETRIC_DEFAULT = JWEAlgorithm.parse(EncryptionAlgorithmSpec.SYMMETRIC_DEFAULT.toString());
+    private static final ImmutableSet<JWEAlgorithm> SYMMETRIC_ALGORITHMS = ImmutableSet.<JWEAlgorithm>builder().addAll(SYMMETRIC).add(SYMMETRIC_DEFAULT).build();
+
     private JWEDecrypterUtil() {
     }
 
@@ -51,29 +53,65 @@ public final class JWEDecrypterUtil {
             AadEncryptionContextConverter aadEncryptionContextConverter)
             throws JOSEException {
 
-        Map<String, String> kmsEncryptionContext = aadEncryptionContextConverter.aadToEncryptionContext(aad);
+        LOG.info("Beginning decryption... ");
+
+        Map<String, String> kmsEncryptionContext = null;
+
+        if (SYMMETRIC_ALGORITHMS.contains(header.getAlgorithm())) {
+            LOG.info("Symmetric algorithm selected. Encryption context will be used. [Algorithm: {}]", header.getAlgorithm());
+            kmsEncryptionContext = aadEncryptionContextConverter.aadToEncryptionContext(aad);
+        } else {
+            LOG.info("Asymmetric algorithm selected. Encryption context will not be used. [Algorithm: {}]", header.getAlgorithm());
+        }
 
         final DecryptResponse cekDecryptResult =
                 decryptCek(kms, keyId, kmsEncryptionContext, header.getAlgorithm(), encryptedKey);
+
         final SecretKey cek =
                 new SecretKeySpec(cekDecryptResult.plaintext().asByteArray(), header.getAlgorithm().toString());
-        return ContentCryptoProvider.decrypt(header, aad, encryptedKey, iv, cipherText, authTag, cek, jcaContext);
+
+        LOG.info("Performing decryption of ciphertext with decrypted CEK...");
+
+        byte[] decryptionResult = ContentCryptoProvider.decrypt(header, aad, encryptedKey, iv, cipherText, authTag, cek, jcaContext);
+
+        LOG.info("Decrypted ciphertext.");
+
+        return decryptionResult;
     }
 
     private static DecryptResponse decryptCek(
             KmsClient kms,
             String keyId,
-            Map<String, String> encryptionContext,
+            @Nullable Map<String, String> encryptionContext,
             JWEAlgorithm alg,
             Base64URL encryptedKey
     ) throws JOSEException {
         try {
-            return kms.decrypt(DecryptRequest.builder()
-                    .encryptionContext(encryptionContext)
+            final String algorithm = JWE_TO_KMS_ALGORITHM_SPEC.get(alg);
+
+            LOG.info("Decrypting encrypted CEK with AWS KMS... [Key ID: {}] [Encryption context: {}] [Encryption algorithm: {}]",
+                    keyId,
+                    encryptionContext,
+                    algorithm);
+
+            DecryptRequest.Builder builder = DecryptRequest.builder()
                     .keyId(keyId)
-                    .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(alg))
-                    .ciphertextBlob(SdkBytes.fromByteArray(encryptedKey.decode()))
-                    .build());
+                    .encryptionAlgorithm(algorithm)
+                    .ciphertextBlob(SdkBytes.fromByteArray(encryptedKey.decode()));
+
+            if (encryptionContext != null) {
+                builder.encryptionContext(encryptionContext);
+            }
+
+            final DecryptResponse decrypt = kms.decrypt(builder.build());
+
+            LOG.info("Received CEK decryption result from AWS KMS. [Key ID: {}] [Encryption context: {}] [Encryption algorithm: {}] [Response metadata: {}]",
+                    keyId,
+                    encryptionContext,
+                    algorithm,
+                    decrypt.responseMetadata().requestId());
+
+            return decrypt;
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException
                  | KmsInvalidStateException e) {
             throw new RemoteKeySourceException("An exception was thrown from KMS due to invalid key.", e);

@@ -8,15 +8,16 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.EncryptionAlgorithmSpec;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Disabled
+//@Disabled
 @Tag("LiveIntegration")
 public class KmsLiveIntegrationTest {
     String keyId = "REPLACEME";
 
     @Test
-    public void testDefaultEncrypterDecrypterWithLiveKms() throws Exception {
+    void testDefaultEncrypterDecrypterWithLiveKms() throws Exception {
         KmsClient kmsClient = KmsClient.builder().region(Region.EU_WEST_1).build();
         String payload = "Hello, live KMS!";
 
@@ -38,6 +39,11 @@ public class KmsLiveIntegrationTest {
         KmsDefaultDecrypter decrypter = new KmsDefaultDecrypter(kmsClient, keyId);
         parsedJwe.decrypt(decrypter);
 
-        assertEquals(payload, parsedJwe.getPayload().toString());
+        assertThat(payload).isEqualTo(parsedJwe.getPayload().toString());
+    }
+
+    @Test
+    void testAsymmetricSignerWithLiveKms() throws Exception {
+
     }
 }

@@ -22,6 +22,8 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsSymmetricCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.ContentCryptoProvider;
 import com.nimbusds.jose.util.Base64URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
 
@@ -37,6 +39,8 @@ import javax.crypto.spec.SecretKeySpec;
  */
 @ThreadSafe
 public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements JWEEncrypter {
+    private static final Logger LOG = LoggerFactory.getLogger(KmsSymmetricEncrypter.class);
+
     public KmsSymmetricEncrypter(final KmsClient kms, final String keyId) {
         super(kms, keyId);
     }
@@ -46,7 +50,6 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
                                  final AadEncryptionContextConverter aadEncryptionContextConverter) {
         super(kms, keyId, aadEncryptionContextConverter);
     }
-
 
     @Override
     public JWECryptoParts encrypt(final JWEHeader header, final byte[] clearText, final byte[] aad)
@@ -71,11 +74,18 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
                                                     byte[] aad)
             throws JOSEException {
         try {
-            return getKms().generateDataKey(GenerateDataKeyRequest.builder()
-                    .keyId(keyId)
-                    .keySpec(ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(encryptionMethod))
-                    .encryptionContext(getAadEncryptionContextConverter().aadToEncryptionContext(aad))
-                    .build());
+            LOG.info("Fetching fetching newly-generated data key from AWS KMS...");
+            GenerateDataKeyResponse generateDataKeyResponse = getKms()
+                    .generateDataKey(GenerateDataKeyRequest.builder()
+                            .keyId(keyId)
+                            .keySpec(ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(encryptionMethod))
+                            .encryptionContext(getAadEncryptionContextConverter().aadToEncryptionContext(aad))
+                            .build()
+                    );
+
+            LOG.info("Fetched data key from AWS KMS.");
+
+            return generateDataKeyResponse;
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException
                  | KmsInvalidStateException e) {
             throw new RemoteKeySourceException("An exception was thrown from KMS due to invalid key.", e);
