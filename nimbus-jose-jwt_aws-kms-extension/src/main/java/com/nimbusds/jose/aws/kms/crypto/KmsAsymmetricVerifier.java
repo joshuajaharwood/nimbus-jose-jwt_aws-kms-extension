@@ -22,13 +22,14 @@ import com.nimbusds.jose.aws.kms.crypto.impl.KmsAsymmetricSigningCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.crypto.impl.CriticalHeaderParamsDeferral;
 import com.nimbusds.jose.util.Base64URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.nio.ByteBuffer;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -39,6 +40,7 @@ import java.util.Set;
  */
 @ThreadSafe
 public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider implements JWSVerifier, CriticalHeaderParamsAware {
+    private static final Logger LOG = LoggerFactory.getLogger(KmsAsymmetricVerifier.class);
 
     /**
      * The critical header policy.
@@ -62,14 +64,12 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
 
     @Override
     public Set<String> getProcessedCriticalHeaderParams() {
-
         return critPolicy.getProcessedCriticalHeaderParams();
     }
 
 
     @Override
     public Set<String> getDeferredCriticalHeaderParams() {
-
         return critPolicy.getDeferredCriticalHeaderParams();
     }
 
@@ -78,8 +78,10 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
     public boolean verify(
             final JWSHeader header, final byte[] signedContent, final Base64URL signature)
             throws JOSEException {
+        LOG.info("Verifying signature...");
 
         if (!critPolicy.headerPasses(header)) {
+            LOG.info("Critical header policy failed.");
             return false;
         }
 
@@ -90,6 +92,11 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
             // We've already checked if the given algorithm is mapped in KmsAsymmetricSigningCryptoProvider
             SigningAlgorithmSpec signingAlgorithmSpec = JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm());
 
+            LOG.debug("Sending verify request to AWS KMS... [Private key ID/ARN: {}] [Signed content length: {}] [Signature length: {}]",
+                    getPrivateKeyId(),
+                    signedContent.length,
+                    signature);
+
             verifyResponse = getKms().verify(VerifyRequest.builder()
                     .keyId(getPrivateKeyId())
                     .signingAlgorithm(signingAlgorithmSpec)
@@ -97,7 +104,10 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
                     .message(SdkBytes.fromByteBuffer(message))
                     .signature(SdkBytes.fromByteBuffer(ByteBuffer.wrap(signature.decode())))
                     .build());
+
+            LOG.debug("AWS KMS verify response received.");
         } catch (KmsInvalidSignatureException e) {
+            LOG.info("Signature was invalid.");
             return false;
         } catch (NotFoundException | DisabledException | KeyUnavailableException | InvalidKeyUsageException
                  | KmsInvalidStateException e) {
@@ -106,7 +116,11 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
             throw new TemporaryJOSEException("A temporary exception was thrown from KMS.", e);
         }
 
-        return verifyResponse.signatureValid();
+        boolean isValid = verifyResponse.signatureValid();
+
+        LOG.info(!isValid ? "Signature is invalid." : "Signature is valid.");
+
+        return isValid;
     }
 
 }

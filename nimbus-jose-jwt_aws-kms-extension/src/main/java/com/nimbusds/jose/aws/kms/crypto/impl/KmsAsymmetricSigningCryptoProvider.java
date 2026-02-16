@@ -22,6 +22,8 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.impl.BaseJWSProvider;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
@@ -38,6 +40,9 @@ import java.util.Set;
  * This class provides cryptography support for signing/verification with asymmetric keys stored in AWS KMS.
  */
 public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider {
+    private static final Logger LOG = LoggerFactory.getLogger(KmsAsymmetricSigningCryptoProvider.class);
+
+    private static final int KMS_RAW_SIZE_LIMIT = 4096;
 
     /**
      * AWS-KMS client.
@@ -152,9 +157,20 @@ public abstract class KmsAsymmetricSigningCryptoProvider extends BaseJWSProvider
             try {
                 messageDigestProvider = MessageDigest.getInstance(messageDigestAlgorithm);
             } catch (NoSuchAlgorithmException e) {
-                throw new JOSEException("Invalid message digest algorithm.", e);
+                throw new JOSEException(String.format("Invalid message digest algorithm: %s", alg), e);
             }
+
+            LOG.debug("Digesting input with algorithm {}...", messageDigestProvider.getAlgorithm());
             message = messageDigestProvider.digest(message);
+            LOG.debug("Digest complete. [Digest: {}]", message);
+
+        } else if (messageType == MessageType.RAW) {
+            if (signingInput.length > KMS_RAW_SIZE_LIMIT) {
+                throw new JOSEException(String.format("Payload larger than KMS RAW message type limit of %d. Use DIGEST instead.",
+                        KMS_RAW_SIZE_LIMIT));
+            }
+
+            LOG.debug("Message type is RAW. No digest will be performed.");
         }
 
         return ByteBuffer.wrap(message);

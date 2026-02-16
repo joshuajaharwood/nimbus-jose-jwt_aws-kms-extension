@@ -24,6 +24,8 @@ import com.nimbusds.jose.RemoteKeySourceException;
 import com.nimbusds.jose.aws.kms.crypto.impl.KmsAsymmetricSigningCryptoProvider;
 import com.nimbusds.jose.aws.kms.exceptions.TemporaryJOSEException;
 import com.nimbusds.jose.util.Base64URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
@@ -40,6 +42,7 @@ import java.util.Optional;
  */
 @ThreadSafe
 public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider implements JWSSigner {
+    private static final Logger LOG = LoggerFactory.getLogger(KmsAsymmetricSigner.class);
 
     public KmsAsymmetricSigner(
             final KmsClient kms, final String privateKeyId, final MessageType messageType) {
@@ -48,6 +51,7 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
 
     @Override
     public Base64URL sign(final JWSHeader header, final byte[] signingInput) throws JOSEException {
+        LOG.info("Signing payload...");
 
         final ByteBuffer message = getMessage(header, signingInput);
         SignResponse signResponse;
@@ -55,12 +59,19 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
             // We've already checked if the given algorithm is mapped in KmsAsymmetricSigningCryptoProvider
             SigningAlgorithmSpec signingAlgorithmSpec = JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm());
 
-            signResponse = getKms().sign(SignRequest.builder()
+            LOG.debug("Signing payload with AWS KMS... [Payload length: {}] [Signing algorithm: {}]",
+                    signingInput.length,
+                    signingAlgorithmSpec);
+
+            signResponse = getKms()
+                    .sign(SignRequest.builder()
                     .keyId(getPrivateKeyId())
                     .messageType(getMessageType())
                     .message(SdkBytes.fromByteBuffer(message))
                     .signingAlgorithm(signingAlgorithmSpec)
                     .build());
+
+            LOG.info("Payload signed.");
         } catch (NotFoundException | DisabledException | KeyUnavailableException | InvalidKeyUsageException
                  | KmsInvalidStateException e) {
             throw new RemoteKeySourceException("An exception was thrown from KMS due to invalid key.", e);
@@ -68,6 +79,10 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
             throw new TemporaryJOSEException("A temporary exception was thrown from KMS.", e);
         }
 
-        return Base64URL.encode(signResponse.signature().asByteArray());
+        Base64URL encoded = Base64URL.encode(signResponse.signature().asByteArray());
+
+        LOG.info("Payload signed.");
+
+        return encoded;
     }
 }
