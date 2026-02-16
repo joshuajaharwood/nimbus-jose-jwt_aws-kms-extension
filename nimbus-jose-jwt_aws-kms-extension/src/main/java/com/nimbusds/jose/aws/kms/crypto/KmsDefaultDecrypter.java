@@ -80,7 +80,7 @@ public class KmsDefaultDecrypter extends KmsDefaultEncryptionCryptoProvider impl
             final byte[] aad)
             throws JOSEException {
 
-        LOG.info("Decrypting JWE using GenerateDataKey API to decrypt CEK...");
+        LOG.info("Decrypting JWE...");
 
         validateJWEHeader(header);
         critPolicy.ensureHeaderPasses(header);

@@ -74,16 +74,16 @@ public class KmsSymmetricEncrypter extends KmsSymmetricCryptoProvider implements
                                                     byte[] aad)
             throws JOSEException {
         try {
-            LOG.info("Fetching fetching newly-generated data key from AWS KMS...");
+            LOG.debug("Fetching CEK from AWS KMS...");
+
             GenerateDataKeyResponse generateDataKeyResponse = getKms()
                     .generateDataKey(GenerateDataKeyRequest.builder()
                             .keyId(keyId)
                             .keySpec(ENCRYPTION_METHOD_TO_DATA_KEY_SPEC_MAP.get(encryptionMethod))
                             .encryptionContext(getAadEncryptionContextConverter().aadToEncryptionContext(aad))
-                            .build()
-                    );
+                            .build());
 
-            LOG.info("Fetched data key from AWS KMS.");
+            LOG.debug("Fetched CEK from AWS KMS.");
 
             return generateDataKeyResponse;
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException

@@ -77,11 +77,11 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
         Map<String, String> kmsEncryptionContext = null;
 
         if (SYMMETRIC_ALGORITHMS.contains(header.getAlgorithm())) {
-            LOG.info("Symmetric algorithm selected. Encryption context will be used. [Algorithm: {}]", header.getAlgorithm());
+            LOG.debug("Symmetric algorithm selected. Encryption context will be used. [Algorithm: {}]", header.getAlgorithm());
 
             kmsEncryptionContext = getAadEncryptionContextConverter().aadToEncryptionContext(aad);
         } else {
-            LOG.info("Asymmetric algorithm selected. Encryption context will not be used. [Algorithm: {}]", header.getAlgorithm());
+            LOG.debug("Asymmetric algorithm selected. Encryption context will not be used. [Algorithm: {}]", header.getAlgorithm());
         }
 
         final EncryptResponse encryptedKey = encryptCEK(getKeyId(), header.getAlgorithm(), kmsEncryptionContext, cek);
@@ -94,7 +94,7 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
                                        SecretKey cek)
             throws JOSEException {
         try {
-            LOG.info("Encrypting locally-generated CEK using AWS KMS...");
+            LOG.debug("Encrypting locally-generated CEK using AWS KMS...");
 
             EncryptRequest.Builder builder = EncryptRequest.builder()
                     .keyId(keyId)
@@ -107,7 +107,7 @@ public class KmsDefaultEncrypter extends KmsDefaultEncryptionCryptoProvider impl
 
             EncryptResponse encrypt = getKms().encrypt(builder.build());
 
-            LOG.info("CEK encrypted.");
+            LOG.debug("CEK encrypted.");
 
             return encrypt;
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException

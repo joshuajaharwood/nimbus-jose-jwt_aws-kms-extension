@@ -81,7 +81,7 @@ public class KmsAsymmetricVerifier extends KmsAsymmetricSigningCryptoProvider im
         LOG.info("Verifying signature...");
 
         if (!critPolicy.headerPasses(header)) {
-            LOG.info("Critical header policy failed.");
+            LOG.info("Critical header policy failed. Verification failed.");
             return false;
         }
 

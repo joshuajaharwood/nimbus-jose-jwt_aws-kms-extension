@@ -59,7 +59,7 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
             // We've already checked if the given algorithm is mapped in KmsAsymmetricSigningCryptoProvider
             SigningAlgorithmSpec signingAlgorithmSpec = JWS_ALGORITHM_TO_SIGNING_ALGORITHM_SPEC.get(header.getAlgorithm());
 
-            LOG.debug("Signing payload with AWS KMS... [Payload length: {}] [Signing algorithm: {}]",
+            LOG.debug("Sending sign request to AWS KMS... [Payload length: {}] [Signing algorithm: {}]",
                     signingInput.length,
                     signingAlgorithmSpec);
 
@@ -71,7 +71,7 @@ public class KmsAsymmetricSigner extends KmsAsymmetricSigningCryptoProvider impl
                     .signingAlgorithm(signingAlgorithmSpec)
                     .build());
 
-            LOG.info("Payload signed.");
+            LOG.debug("Sign response received.");
         } catch (NotFoundException | DisabledException | KeyUnavailableException | InvalidKeyUsageException
                  | KmsInvalidStateException e) {
             throw new RemoteKeySourceException("An exception was thrown from KMS due to invalid key.", e);

@@ -53,15 +53,13 @@ public final class JWEDecrypterUtil {
             AadEncryptionContextConverter aadEncryptionContextConverter)
             throws JOSEException {
 
-        LOG.info("Beginning decryption... ");
-
         Map<String, String> kmsEncryptionContext = null;
 
         if (SYMMETRIC_ALGORITHMS.contains(header.getAlgorithm())) {
-            LOG.info("Symmetric algorithm selected. Encryption context will be used. [Algorithm: {}]", header.getAlgorithm());
+            LOG.debug("Symmetric algorithm selected. Encryption context will be used. [Algorithm: {}]", header.getAlgorithm());
             kmsEncryptionContext = aadEncryptionContextConverter.aadToEncryptionContext(aad);
         } else {
-            LOG.info("Asymmetric algorithm selected. Encryption context will not be used. [Algorithm: {}]", header.getAlgorithm());
+            LOG.debug("Asymmetric algorithm selected. Encryption context will not be used. [Algorithm: {}]", header.getAlgorithm());
         }
 
         final DecryptResponse cekDecryptResult =
@@ -70,11 +68,11 @@ public final class JWEDecrypterUtil {
         final SecretKey cek =
                 new SecretKeySpec(cekDecryptResult.plaintext().asByteArray(), header.getAlgorithm().toString());
 
-        LOG.info("Performing decryption of ciphertext with decrypted CEK...");
+        LOG.debug("Performing decryption of ciphertext with decrypted CEK...");
 
         byte[] decryptionResult = ContentCryptoProvider.decrypt(header, aad, encryptedKey, iv, cipherText, authTag, cek, jcaContext);
 
-        LOG.info("Decrypted ciphertext.");
+        LOG.debug("Decrypted ciphertext.");
 
         return decryptionResult;
     }
@@ -89,7 +87,7 @@ public final class JWEDecrypterUtil {
         try {
             final String algorithm = JWE_TO_KMS_ALGORITHM_SPEC.get(alg);
 
-            LOG.info("Decrypting encrypted CEK with AWS KMS... [Key ID: {}] [Encryption context: {}] [Encryption algorithm: {}]",
+            LOG.debug("Decrypting encrypted CEK with AWS KMS... [Key ID: {}] [Encryption context: {}] [Encryption algorithm: {}]",
                     keyId,
                     encryptionContext,
                     algorithm);
@@ -105,7 +103,7 @@ public final class JWEDecrypterUtil {
 
             final DecryptResponse decrypt = kms.decrypt(builder.build());
 
-            LOG.info("Received CEK decryption result from AWS KMS. [Key ID: {}] [Encryption context: {}] [Encryption algorithm: {}] [Response metadata: {}]",
+            LOG.debug("Received CEK decryption result from AWS KMS. [Key ID: {}] [Encryption context: {}] [Encryption algorithm: {}] [Response metadata: {}]",
                     keyId,
                     encryptionContext,
                     algorithm,
