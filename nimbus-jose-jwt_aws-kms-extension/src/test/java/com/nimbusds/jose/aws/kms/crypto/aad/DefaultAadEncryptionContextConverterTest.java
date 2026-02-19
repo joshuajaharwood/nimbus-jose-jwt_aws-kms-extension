@@ -56,10 +56,7 @@ public class DefaultAadEncryptionContextConverterTest {
             verify(mockKms).encrypt(captor.capture());
 
             Map<String, String> context = captor.getValue().encryptionContext();
-            byte[] expectedAad = AAD.compute(header);
-            String expectedEncodedAad = Base64URL.encode(expectedAad).toString();
-
-            assertThat(context).containsExactly(entry(DefaultAadEncryptionContextConverter.AAD_CONTEXT_KEY, expectedEncodedAad));
+            assertThat(context).isEmpty();
         }
 
         @Test
@@ -81,9 +78,7 @@ public class DefaultAadEncryptionContextConverterTest {
             verify(mockKms).encrypt(captor.capture());
 
             Map<String, String> context = captor.getValue().encryptionContext();
-            String expectedEncodedAad = Base64URL.encode(customAad).toString();
-
-            assertThat(context).containsExactly(entry(DefaultAadEncryptionContextConverter.AAD_CONTEXT_KEY, expectedEncodedAad));
+            assertThat(context).isEmpty();
         }
 
         @Test

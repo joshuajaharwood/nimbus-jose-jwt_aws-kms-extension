@@ -219,7 +219,6 @@ public class KmsDefaultDecrypterTest {
                 void beforeEach() throws JOSEException {
                     when(mockAwsKms
                             .decrypt(DecryptRequest.builder()
-                                    .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                     .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                     .keyId(testKeyId)
                                     .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))

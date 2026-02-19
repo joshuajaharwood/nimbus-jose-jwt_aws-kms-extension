@@ -65,6 +65,7 @@ public class JWEDecrypterUtilTest {
     @BeforeEach
     void setUp() {
       testKeyId = random.nextObject(String.class);
+      // Asymmetric, and so should have no encryption context as AWS doesn't support it
       testJweHeader = new JWEHeader.Builder(
               JWEAlgorithm.RSA_OAEP_256,
               EncryptionMethod.A256GCM)
@@ -80,7 +81,6 @@ public class JWEDecrypterUtilTest {
         final KmsException invalidKeyException = mock(invalidKeyExceptionClass);
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
-                                       .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                        .keyId(testKeyId)
                                        .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                        .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
@@ -114,7 +114,6 @@ public class JWEDecrypterUtilTest {
         final KmsException temporaryKMSException = mock(temporaryKMSExceptionClass);
         when(mockAwsKms
                 .decrypt(DecryptRequest.builder()
-                                       .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
                                        .keyId(testKeyId)
                                        .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(testJweHeader.getAlgorithm()))
                                        .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
@@ -150,13 +149,17 @@ public class JWEDecrypterUtilTest {
       private final byte[] expectedData = new byte[random.nextInt(512)];
 
       void parameterizedBeforeEach(final JWEHeader jweHeader) {
-        when(mockAwsKms
-                .decrypt(DecryptRequest.builder()
-                                       .encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)))
-                                       .keyId(testKeyId)
-                                       .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(jweHeader.getAlgorithm()))
-                                       .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())))
-                                       .build()))
+        DecryptRequest.Builder builder = DecryptRequest.builder()
+                .keyId(testKeyId)
+                .encryptionAlgorithm(JWE_TO_KMS_ALGORITHM_SPEC.get(jweHeader.getAlgorithm()))
+                .ciphertextBlob(SdkBytes.fromByteBuffer(ByteBuffer.wrap(testEncryptedKey.decode())));
+
+        if (JWEAlgorithm.Family.SYMMETRIC.contains(jweHeader.getAlgorithm()) ||
+                jweHeader.getAlgorithm().getName().equals("SYMMETRIC_DEFAULT")) {
+            builder.encryptionContext(aadEncryptionContextConverter.aadToEncryptionContext(AAD.compute(testJweHeader)));
+        }
+
+        when(mockAwsKms.decrypt(builder.build()))
                 .thenReturn(testDecryptResult);
 
         random.nextBytes(expectedData);
