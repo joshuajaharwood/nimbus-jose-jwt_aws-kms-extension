@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.joshuaharwood'
-version = '2.0.0-SNAPSHOT'
+version = '2.0.0'
 
 java {
     toolchain {
@@ -44,7 +44,6 @@ dependencies {
 
     // These dependencies is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'software.amazon.awssdk:kms:2.41.27'
-    implementation 'commons-cli:commons-cli:1.11.0'
     implementation 'commons-codec:commons-codec:1.21.0'
 
     implementation 'com.google.guava:guava:33.5.0-jre'
@@ -53,7 +52,6 @@ dependencies {
     implementation platform('org.slf4j:slf4j-bom:2.0.17')
 
     implementation 'org.slf4j:slf4j-api'
-
 
     // Use JUnit Jupiter for testing.
     testImplementation 'org.slf4j:slf4j-simple'
