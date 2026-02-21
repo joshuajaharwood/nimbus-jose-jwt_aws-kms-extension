@@ -73,7 +73,6 @@ dependencies {
     testImplementation 'org.jeasy:easy-random-core:4.3.0'
 }
 
-apply from: 'scripts.gradle'
 apply from: 'maven.gradle'
 
 test {
