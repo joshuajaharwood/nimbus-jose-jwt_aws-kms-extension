@@ -107,7 +107,7 @@ public final class JWEDecrypterUtil {
                     keyId,
                     encryptionContext,
                     algorithm,
-                    decrypt.responseMetadata().requestId());
+                    decrypt.responseMetadata() != null ? decrypt.responseMetadata().requestId() : null);
 
             return decrypt;
         } catch (NotFoundException | DisabledException | InvalidKeyUsageException | KeyUnavailableException

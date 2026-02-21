@@ -145,8 +145,7 @@ public class KmsAsymmetricSigningCryptoProviderTest {
                 @DisplayName("with invalid message digest algorithm,")
                 class WithInvalidDigestAlgorithm {
 
-                    @Mock
-                    private NoSuchAlgorithmException mockNoSuchAlgorithmException;
+                    private final NoSuchAlgorithmException testNoSuchAlgorithmException = new NoSuchAlgorithmException();
 
                     @BeforeEach
                     void beforeEach() {
@@ -154,7 +153,7 @@ public class KmsAsymmetricSigningCryptoProviderTest {
                                 .when(() -> MessageDigest.getInstance(
                                         KmsAsymmetricSigningCryptoProvider.JWS_ALGORITHM_TO_MESSAGE_DIGEST_ALGORITHM.get(
                                                 testJwsHeader.getAlgorithm())))
-                                .thenThrow(mockNoSuchAlgorithmException);
+                                .thenThrow(testNoSuchAlgorithmException);
                     }
 
                     @Test
@@ -163,8 +162,8 @@ public class KmsAsymmetricSigningCryptoProviderTest {
                         assertThatThrownBy(
                                 () -> kmsAsymmetricSigningCryptoProvider.getMessage(testJwsHeader, testSigningInputBytes))
                                 .isInstanceOf(JOSEException.class)
-                                .hasMessage("Invalid message digest algorithm.")
-                                .hasCause(mockNoSuchAlgorithmException);
+                                .hasMessage(String.format("Invalid message digest algorithm: %s", testJwsHeader.getAlgorithm()))
+                                .hasCause(testNoSuchAlgorithmException);
                     }
                 }
 
