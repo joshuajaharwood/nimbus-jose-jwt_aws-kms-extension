@@ -62,25 +62,25 @@ This library is available on [Maven Central](https://search.maven.org/artifact/s
 Following are the installation details.
 
 ## Apache Maven
+
 ```xml
-<!--todo: cut a release after manual testing-->
-<!--<dependency>-->
-<!--    <groupId>software.amazon.lynx</groupId>-->
-<!--    <artifactId>nimbus-jose-jwt_aws-kms-extension</artifactId>-->
-<!--    <version>1.0.0</version>-->
-<!--</dependency>-->
+<dependency>
+    <groupId>com.joshuaharwood</groupId>
+    <artifactId>nimbus-jose-jwt_aws-kms-extension</artifactId>
+    <version>2.0.0</version>
+</dependency>
 ```
 
 ## Gradle Groovy DSL
+
 ```groovy
-//repositories {
-//    mavenCentral()
-//}
-//
-//dependencies {
-////    todo: cut a release after manual testing
-//    implementation "software.amazon.lynx:nimbus-jose-jwt_aws-kms-extension:1.0.0"
-//}
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "com.joshuaharwood:nimbus-jose-jwt_aws-kms-extension:2.0.0"
+}
 ```
 
 # Security

@@ -2,7 +2,7 @@ plugins {
     // Apply the java-library plugin for API and implementation separation.
     id 'java-library'
     id 'jacoco'
-    id 'maven-publish'
+    id "com.vanniktech.maven.publish" version "0.36.0"
     id 'signing'
 }
 
@@ -13,8 +13,6 @@ java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(8)
     }
-    withJavadocJar()
-    withSourcesJar()
 }
 
 javadoc {
@@ -71,7 +69,43 @@ dependencies {
     testImplementation 'org.jeasy:easy-random-core:4.3.0'
 }
 
-apply from: 'maven.gradle'
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    coordinates 'com.joshuaharwood', 'nimbus-jose-jwt_aws-kms-extension', '2.0.0'
+
+    pom {
+        name = 'AWS KMS Extension Fork, for Nimbus JOSE JWT'
+        description = 'This library package is a fork of an extension of nimbus-jose-jwt library. ' +
+                'It provides JWE based encrypters/decrypters and JWS based signers/verifiers ' +
+                'for doing operations with cryptographic keys stores in AWS KMS.'
+        url = 'https://github.com/joshuajaharwood/nimbus-jose-jwt_aws-kms-extension'
+        licenses {
+            license {
+                name = 'The Apache License, Version 2.0'
+                url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+        }
+        scm {
+            connection = 'scm:git:ssh://github.com/joshuajaharwood/nimbus-jose-jwt_aws-kms-extension.git'
+            url = 'https://github.com/joshuajaharwood/nimbus-jose-jwt_aws-kms-extension'
+            tag = "v$version"
+        }
+        developers {
+            developer {
+                id = 'joshuajaharwood'
+                name = 'Joshua J. A. Harwood'
+                email = 'me@joshuaharwood.com'
+            }
+            developer {
+                id = 'lynx-tech'
+                name = 'Lync Tech'
+                email = 'lynx-tech@amazon.com'
+            }
+        }
+    }
+}
 
 test {
     useJUnitPlatform() // Use JUnit Platform for unit tests.
